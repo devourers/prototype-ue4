@@ -56,4 +56,9 @@ public:
 	bool can_bhop = false;
 
 	FTimerHandle BhopHandler;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		int Health;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		TArray<int32> Inventory;
 };
