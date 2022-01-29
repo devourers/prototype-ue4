@@ -7,6 +7,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/Character.h"
+#include "ExplosionGun.h"
 #include "Bullet.h"
 #include "ProtagClass.generated.h"
 
@@ -47,15 +48,22 @@ public:
 		void Fire();
 	UPROPERTY(VisibleAnywhere)
 		UCameraComponent* ProtagCameraComponent;
-	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh)
 		USkeletalMeshComponent* ProtagMesh;
 	UPROPERTY(VisibleAnywhere)
 		UCharacterMovementComponent* ProtagMovement;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 		FVector MuzzleOffset;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+		TSubclassOf<class AExplosionGun> ExpGun;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+		class AExplosionGun* Gun;
+
 	bool can_bhop = false;
 
 	FTimerHandle BhopHandler;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		int Health;
 	

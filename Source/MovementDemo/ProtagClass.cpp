@@ -24,8 +24,8 @@ AProtagClass::AProtagClass()
 	ProtagMesh->bCastDynamicShadow = false;
 	ProtagMesh->CastShadow = false;
 	GetMesh()->SetOwnerNoSee(true);
-
 	ProtagMovement = GetCharacterMovement();
+
 }
 
 // Called when the game starts or when spawned
@@ -35,6 +35,19 @@ void AProtagClass::BeginPlay()
 	check(GEngine != nullptr);
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("playing as protag"));
 	
+	if (ExpGun) {
+		FActorSpawnParameters gun_params;
+		gun_params.bNoFail = true;
+		gun_params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+		FTransform GunTransform;
+		GunTransform.SetLocation(FVector::ZeroVector);
+		GunTransform.SetRotation(FQuat(FRotator::ZeroRotator));
+		Gun = GetWorld()->SpawnActor<AExplosionGun>(ExpGun, GunTransform, gun_params);
+		if (Gun) {
+			GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, TEXT("Got gun"));
+		}
+	}
 	
 }
 
@@ -101,7 +114,20 @@ void AProtagClass::StopJump() {
 }
 
 void AProtagClass::Fire() {
-	if (BulletClass){
+	if (Gun) {
+		FVector CameraLocation;
+		FRotator CameraRotation;
+		GetActorEyesViewPoint(CameraLocation, CameraRotation);
+		MuzzleOffset.Set(100.0f, 0.0f, 0.0f);
+
+		FVector MuzzleLocation = CameraLocation + FTransform(CameraRotation).TransformVector(MuzzleOffset);
+
+		FRotator MuzzleRotation = CameraRotation;
+		CameraRotation.Pitch += 10.0f;
+
+		Gun->Fire(MuzzleLocation, MuzzleRotation);
+	}
+	/*else if (BulletClass) {
 		FVector CameraLocation;
 		FRotator CameraRotation;
 		GetActorEyesViewPoint(CameraLocation, CameraRotation);
@@ -124,4 +150,5 @@ void AProtagClass::Fire() {
 			}
 		}
 	}
+	*/
 }
