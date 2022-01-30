@@ -2,6 +2,8 @@
 
 
 #include "ExplodingProjectile.h"
+#include "Engine/DecalActor.h"
+#include "Components/DecalComponent.h"
 
 // Sets default values
 AExplodingProjectile::AExplodingProjectile()
@@ -30,13 +32,13 @@ AExplodingProjectile::AExplodingProjectile()
 	}
 	if (!ProjectileMeshComponent) {
 		ProjectileMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ProjectileMesh"));
-		static ConstructorHelpers::FObjectFinder<UStaticMesh>Mesh(TEXT("'/Game/Sphere.Sphere'"));
+		static ConstructorHelpers::FObjectFinder<UStaticMesh>Mesh(TEXT("'/Game/Meshes/Sphere.Sphere'"));
 		if (Mesh.Succeeded()) {
 			ProjectileMeshComponent->SetStaticMesh(Mesh.Object);
 		}
 	}
 
-	static ConstructorHelpers::FObjectFinder<UMaterial>Material(TEXT("'/Game/BulletMaterial.BulletMaterial'"));
+	static ConstructorHelpers::FObjectFinder<UMaterial>Material(TEXT("'/Game/Materials/BulletMaterial.BulletMaterial'"));
 	if (Material.Succeeded()) {
 		ProjectileMaterialInstance = UMaterialInstanceDynamic::Create(Material.Object, ProjectileMeshComponent);
 	}
@@ -69,11 +71,20 @@ void AExplodingProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* Othe
 	FVector Start = MyLocation;
 	FVector End = MyLocation;
 	TArray<FHitResult> OutHits;
+
 	bool isHit = GetWorld()->SweepMultiByChannel(OutHits, Start, End, FQuat::Identity, ECC_WorldStatic, onHitColl);
 	for (auto& Hit : OutHits) {
 		UStaticMeshComponent* MeshComp = Cast<UStaticMeshComponent>((Hit.GetActor())->GetRootComponent());
 		if (MeshComp) {
 			MeshComp->AddRadialImpulse(Hit.ImpactPoint, 600.0f, ExProjectileMovementComponent->Velocity.Size() * 100.0f, ERadialImpulseFalloff::RIF_Constant);
+			/*
+			ADecalActor* decal = GetWorld()->SpawnActor<ADecalActor>(Hit.Location, FRotator());
+			if (decal) {
+				//decal->SetDecalMaterial()
+				decal->SetLifeSpan(2.0f);
+				decal->GetDecal()->DecalSize = FVector(32.0f, 64.0f, 64.0f);
+			}
+			*/
 		}
 	}
 

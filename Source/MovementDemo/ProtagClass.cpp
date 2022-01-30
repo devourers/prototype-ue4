@@ -2,6 +2,7 @@
 
 
 #include "ProtagClass.h"
+#include "Kismet/GameplayStatics.h"
 #include <string>
 
 // Sets default values
@@ -34,7 +35,6 @@ void AProtagClass::BeginPlay()
 	Super::BeginPlay();
 	check(GEngine != nullptr);
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("playing as protag"));
-	
 	if (ExpGun) {
 		FActorSpawnParameters gun_params;
 		gun_params.bNoFail = true;
@@ -83,6 +83,7 @@ void AProtagClass::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AProtagClass::StartJump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &AProtagClass::StopJump);
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AProtagClass::Fire);
+	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &AProtagClass::Reload);
 }
 
 void AProtagClass::MoveForward(float value) {
@@ -114,6 +115,20 @@ void AProtagClass::StopJump() {
 }
 
 void AProtagClass::Fire() {
+	/*
+	if (Inventory[EquippedWeapon]) {
+		FVector CameraLocation;
+		FRotator CameraRotation;
+		GetActorEyesViewPoint(CameraLocation, CameraRotation);
+		MuzzleOffset.Set(100.0f, 0.0f, 0.0f);
+
+		FVector MuzzleLocation = CameraLocation + FTransform(CameraRotation).TransformVector(MuzzleOffset);
+
+		FRotator MuzzleRotation = CameraRotation;
+		CameraRotation.Pitch += 10.0f;
+		Inventory[EquippedWeapon]->AttackWithWeapon(MuzzleLocation, MuzzleRotation); //TODO is it right?
+	}
+	*/
 	if (Gun) {
 		FVector CameraLocation;
 		FRotator CameraRotation;
@@ -124,31 +139,14 @@ void AProtagClass::Fire() {
 
 		FRotator MuzzleRotation = CameraRotation;
 		CameraRotation.Pitch += 10.0f;
-
+		if (SB_shot != nullptr) {
+			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Playing sound"));
+			UGameplayStatics::PlaySoundAtLocation(this, SB_shot, GetActorLocation());
+		}
 		Gun->Fire(MuzzleLocation, MuzzleRotation);
 	}
-	/*else if (BulletClass) {
-		FVector CameraLocation;
-		FRotator CameraRotation;
-		GetActorEyesViewPoint(CameraLocation, CameraRotation);
-		MuzzleOffset.Set(100.0f, 0.0f, 0.0f);
+}
 
-		FVector MuzzleLocation = CameraLocation + FTransform(CameraRotation).TransformVector(MuzzleOffset);
-
-		FRotator MuzzleRotation = CameraRotation;
-		CameraRotation.Pitch += 10.0f;
-
-		UWorld* World = GetWorld();
-		if (World) {
-			FActorSpawnParameters SpawnParams;
-			SpawnParams.Owner = this;
-			SpawnParams.Instigator = GetInstigator();
-			ABullet* SpawnedBullet = World->SpawnActor<ABullet>(BulletClass, MuzzleLocation, MuzzleRotation, SpawnParams);
-			if (SpawnedBullet) {
-				FVector LaunchDirection = MuzzleRotation.Vector();
-				SpawnedBullet->FireInDirection(LaunchDirection);
-			}
-		}
-	}
-	*/
+void AProtagClass::Reload() {
+	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("I Am Reloading"));
 }

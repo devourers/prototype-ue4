@@ -6,7 +6,11 @@
 #include "GameFramework/Actor.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Sound/SoundBase.h"
+#include "Sound/SoundCue.h"
 #include "ExplodingProjectile.generated.h"
+
+class USoundBase;
 
 UCLASS()
 class MOVEMENTDEMO_API AExplodingProjectile : public AActor
@@ -32,7 +36,7 @@ public:
 		UProjectileMovementComponent* ExProjectileMovementComponent;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Projectile)
 		UStaticMeshComponent* ProjectileMeshComponent;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Movement)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Material")
 		UMaterialInstanceDynamic* ProjectileMaterialInstance;
 
 

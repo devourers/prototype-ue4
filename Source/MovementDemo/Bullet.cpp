@@ -20,6 +20,7 @@ ABullet::ABullet()
 		RootComponent = CollisionComponent;
 	}
 	if (!BulletMovementComponent) {
+		//Move all of this to .h
 		BulletMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Movement Component"));
 		BulletMovementComponent->SetUpdatedComponent(CollisionComponent);
 		BulletMovementComponent->InitialSpeed = 3000.0f;
@@ -32,13 +33,13 @@ ABullet::ABullet()
 
 	if (!BulletMeshComponent) {
 		BulletMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BulletMesh"));
-		static ConstructorHelpers::FObjectFinder<UStaticMesh>Mesh(TEXT("'/Game/Sphere.Sphere'"));
+		static ConstructorHelpers::FObjectFinder<UStaticMesh>Mesh(TEXT("'/Game/Meshes/Sphere.Sphere'"));
 		if (Mesh.Succeeded()) {
 			BulletMeshComponent->SetStaticMesh(Mesh.Object);
 		}
 	}
 
-	static ConstructorHelpers::FObjectFinder<UMaterial>Material(TEXT("'/Game/BulletMaterial.BulletMaterial'"));
+	static ConstructorHelpers::FObjectFinder<UMaterial>Material(TEXT("'/Game/Materials/BulletMaterial.BulletMaterial'"));
 	if (Material.Succeeded()) {
 		BulletMaterialInstance = UMaterialInstanceDynamic::Create(Material.Object, BulletMeshComponent);
 	}

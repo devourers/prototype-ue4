@@ -9,6 +9,7 @@
 #include "GameFramework/Character.h"
 #include "ExplosionGun.h"
 #include "Bullet.h"
+#include "WeaponBase.h"
 #include "ProtagClass.generated.h"
 
 UCLASS()
@@ -23,9 +24,6 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	UPROPERTY(EditDefaultsOnly, Category = Projectile)
-		TSubclassOf<class ABullet> BulletClass;
-
 
 public:	
 	// Called every frame
@@ -36,16 +34,24 @@ public:
 
 	UFUNCTION()
 		void MoveRight(float value);
+
 	UFUNCTION()
 		void MoveForward(float value);
+
 	UFUNCTION()
 		void StartJump();
+
 	UFUNCTION()
 		void StopJump();
+
 	UFUNCTION()
 		void ApplyBhop();
+
 	UFUNCTION()
 		void Fire();
+
+	UFUNCTION()
+		void Reload();
 	UPROPERTY(VisibleAnywhere)
 		UCameraComponent* ProtagCameraComponent;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh)
@@ -59,14 +65,18 @@ public:
 		TSubclassOf<class AExplosionGun> ExpGun;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 		class AExplosionGun* Gun;
-
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Audio)
+		USoundBase* SB_shot;
 	bool can_bhop = false;
 
 	FTimerHandle BhopHandler;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		int Health;
+		float Health;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		TArray<int32> Inventory;
+		TArray<class AWeaponBase*> Inventory;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		int EquippedWeapon;
 };

@@ -7,6 +7,7 @@
 #include "ExplodingProjectile.h"
 #include "ExplosionGun.generated.h"
 
+
 UCLASS()
 class MOVEMENTDEMO_API AExplosionGun : public AActor
 {
@@ -30,7 +31,7 @@ public:
 		USkeletalMeshComponent* ExGunMeshComponent;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Mesh)
 		FColor GunColor;
+
 	UFUNCTION()
 		void Fire(const FVector& MuzzleLocation, const FRotator& MuzzleRotation);
-
 };
