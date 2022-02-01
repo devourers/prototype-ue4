@@ -52,31 +52,46 @@ public:
 
 	UFUNCTION()
 		void Reload();
+	
+	UFUNCTION()
+		void SwitchWeapons();
+
+	UFUNCTION()
+		void CanSwitchAgain();
+
+	UPROPERTY()
+		int current_weapon;
+
 	UPROPERTY(VisibleAnywhere)
 		UCameraComponent* ProtagCameraComponent;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh)
 		USkeletalMeshComponent* ProtagMesh;
+
 	UPROPERTY(VisibleAnywhere)
 		UCharacterMovementComponent* ProtagMovement;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Audio)
+		TArray<TSubclassOf<class AWeaponBase>> WeaponInventoryClasess;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Audio)
+		TArray<class AWeaponBase*> WeaponInventory;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 		FVector MuzzleOffset;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-		TSubclassOf<class AExplosionGun> ExpGun;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-		class AExplosionGun* Gun;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Audio)
-		USoundBase* SB_shot;
 	bool can_bhop = false;
 
 	FTimerHandle BhopHandler;
+	FTimerHandle SwitchHandler;
+
+	bool can_switch = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float Health;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		TArray<class AWeaponBase*> Inventory;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		int EquippedWeapon;
+
+
 };

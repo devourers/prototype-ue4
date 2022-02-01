@@ -7,11 +7,11 @@
 #include "BaseProjectile.h"
 #include "WeaponBase.generated.h"
 
-UENUM()
-enum WeaponTypes {
-	RangedProjectile UMETA(DisplayName = "Ranged Projectile"),
-	RangedHitScan UMETA(DisplayName = "Ranged Hitscan"),
-	Melee UMETA(DisplayName = "Melee")
+UENUM(BlueprintType)
+enum EWeaponTypes {
+	eWT_RangedProjectile UMETA(DisplayName = "Ranged Projectile"),
+	eWT_RangedHitScan UMETA(DisplayName = "Ranged Hitscan"),
+	eWT_Melee UMETA(DisplayName = "Melee")
 };
 
 UCLASS()
@@ -27,7 +27,7 @@ public:
 		FString WeaponName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = " Weapon Type ")
-		TEnumAsByte<WeaponTypes> wType;
+		TEnumAsByte<EWeaponTypes> wType;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = " Mesh ")
 		USkeletalMeshComponent* WeaponMeshComponent;
@@ -35,15 +35,26 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = " Projectile ")
 		TSubclassOf<class ABaseProjectile> ProjectileClass;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = " Projectile ")
+		class ABaseProjectile* Projectile;
+
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = " Ammo ")
 		int Magazine;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = " Ammo ")
 		int AmmoCount;
 
 	UPROPERTY()
 		int CurrentAmmo;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = " Damage ")
+		float Range;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Audio)
+		USoundBase* SB_shot;
+
+	UFUNCTION()
+		void HideWeapon(bool to_hide);
 
 protected:
 	// Called when the game starts or when spawned
@@ -55,8 +66,8 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	void AttackWithWeapon(const FVector& MuzzleLocation, const FRotator& MuzzleRotation);
-	void Reload();
-	void StopReload();
+	virtual void AttackWithWeapon(const FVector& MuzzleLocation, const FRotator& MuzzleRotation);
+	virtual void Reload();
+	virtual void StopReload();
 	FTimerHandle ReloadHandler;
 };

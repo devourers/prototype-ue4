@@ -2,6 +2,9 @@
 
 
 #include "WeaponBase.h"
+#include "DrawDebugHelpers.h"
+#include "Kismet/GameplayStatics.h"
+#include <string>
 
 // Sets default values
 AWeaponBase::AWeaponBase()
@@ -13,6 +16,7 @@ AWeaponBase::AWeaponBase()
 	}
 	WeaponMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Skeletal Mesh"));
 	RootComponent = WeaponMeshComponent;
+	
 }
 
 // Called when the game starts or when spawned
@@ -20,37 +24,55 @@ void AWeaponBase::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString(std::to_string(wType).c_str()));
+	CurrentAmmo = Magazine;
 }
 
 // Called every frame
 void AWeaponBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	std::string cal = "Current ammo: " + std::to_string(CurrentAmmo);
+	FString current_ammo_log = WeaponName + ", " + FString(cal.c_str());
+	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, current_ammo_log);
 }
 
 void AWeaponBase::AttackWithWeapon(const FVector& MuzzleLocation, const FRotator& MuzzleRotation) {
 	if (!isReloading) {
-		if (wType == WeaponTypes::Melee) {
+		if (SB_shot != nullptr) {
+			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Playing sound"));
+			UGameplayStatics::PlaySoundAtLocation(this, SB_shot, GetActorLocation());
+		}
+		if (wType == EWeaponTypes::eWT_Melee) {
 			//TODO
 		}
-		else if (wType == WeaponTypes::RangedProjectile) {
+		else if (wType == EWeaponTypes::eWT_RangedProjectile) {
 			check(GEngine != nullptr);
-			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Fired"));
 			UWorld* World = GetWorld();
 			if (World) {
 				FActorSpawnParameters SpawnParams;
 				SpawnParams.Owner = this;
 				SpawnParams.Instigator = GetInstigator();
-				ABaseProjectile* SpawnedBullet = World->SpawnActor<ABaseProjectile>(ProjectileClass, MuzzleLocation, MuzzleRotation, SpawnParams);
-				if (SpawnedBullet) {
+				Projectile = World->SpawnActor<ABaseProjectile>(ProjectileClass, MuzzleLocation, MuzzleRotation, SpawnParams);
+				if (Projectile) {
 					FVector LaunchDirection = MuzzleRotation.Vector();
-					SpawnedBullet->FireInDirection(LaunchDirection);
+					Projectile->FireInDirection(LaunchDirection);
+					this->CurrentAmmo -= 1;
 				}
 			}
 		}
-		else if (wType == WeaponTypes::RangedHitScan) {
-			//TODO
+		else if (wType == EWeaponTypes::eWT_RangedHitScan) {
+			check(GEngine != nullptr);
+			FHitResult ResHit;
+			FVector Start = MuzzleLocation;
+			FVector End = Start + MuzzleRotation.Vector() * Range;
+			FCollisionQueryParams c_q_params;
+			DrawDebugLine(GetWorld(), Start, End, FColor::Green, true);
+			bool isHit = GetWorld()->LineTraceSingleByChannel(ResHit, Start, End, ECC_Visibility, c_q_params);
+			if (isHit && ResHit.GetComponent()->IsSimulatingPhysics()) {
+				ResHit.GetComponent()->AddImpulseAtLocation(10.0f * MuzzleRotation.Vector() * Range, ResHit.ImpactPoint);
+			}
+			this->CurrentAmmo -= 1;
 		}
 	}
 }
@@ -60,11 +82,21 @@ void AWeaponBase::StopReload() {
 }
 
 void AWeaponBase::Reload() {
-	if (!isReloading) {
+	if (!isReloading && AmmoCount > 0) {
 		isReloading = true;
-		AmmoCount -= Magazine - CurrentAmmo;
-		CurrentAmmo = Magazine;
+		if (AmmoCount > Magazine){
+			AmmoCount -= Magazine - CurrentAmmo;
+			CurrentAmmo = Magazine;
+		}
+		else {
+			CurrentAmmo = AmmoCount;
+			AmmoCount = 0;
+		}
 		//play animation;
 		GetWorldTimerManager().SetTimer(ReloadHandler, this, &AWeaponBase::StopReload, 0.2f, false, 1.0f);
 	}
+}
+
+void AWeaponBase::HideWeapon(bool to_hide) {
+	SetActorHiddenInGame(to_hide);
 }
