@@ -85,9 +85,13 @@ void ABaseProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActo
 		TArray<FHitResult> OutHits;
 		bool isHit = GetWorld()->SweepMultiByChannel(OutHits, Start, End, FQuat::Identity, ECC_WorldStatic, onHitColl);
 		for (auto& Hit : OutHits) {
-			UStaticMeshComponent* MeshComp = Cast<UStaticMeshComponent>((Hit.GetActor())->GetRootComponent());
-			if (MeshComp) {
-				MeshComp->AddRadialImpulse(Hit.ImpactPoint, 600.0f, PrMovementComponent->Velocity.Size() * 100.0f, ERadialImpulseFalloff::RIF_Constant);
+			auto* HitComp = Hit.GetComponent();
+			if (Hit.GetActor()->CanBeDamaged()) {
+				FRadialDamageEvent ev;
+				Hit.GetActor()->TakeDamage(Damage, ev, GetInstigatorController(), this);
+			}
+			if (HitComp) {
+				HitComp->AddRadialImpulse(Hit.ImpactPoint, 600.0f, PrMovementComponent->Velocity.Size() * 10.0f, ERadialImpulseFalloff::RIF_Constant);
 			}
 		}
 

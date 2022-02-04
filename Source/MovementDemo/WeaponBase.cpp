@@ -37,10 +37,10 @@ void AWeaponBase::Tick(float DeltaTime)
 	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, current_ammo_log);
 }
 
-void AWeaponBase::AttackWithWeapon(const FVector& MuzzleLocation, const FRotator& MuzzleRotation) {
+void AWeaponBase::AttackWithWeapon(const FVector& MuzzleLocation, const FRotator& MuzzleRotation, AController* Controller) {
 	if (!isReloading) {
 		if (SB_shot != nullptr) {
-			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Playing sound"));
+			//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Playing sound"));
 			UGameplayStatics::PlaySoundAtLocation(this, SB_shot, GetActorLocation());
 		}
 		if (wType == EWeaponTypes::eWT_Melee) {
@@ -69,8 +69,14 @@ void AWeaponBase::AttackWithWeapon(const FVector& MuzzleLocation, const FRotator
 			FCollisionQueryParams c_q_params;
 			DrawDebugLine(GetWorld(), Start, End, FColor::Green, true);
 			bool isHit = GetWorld()->LineTraceSingleByChannel(ResHit, Start, End, ECC_Visibility, c_q_params);
-			if (isHit && ResHit.GetComponent()->IsSimulatingPhysics()) {
-				ResHit.GetComponent()->AddImpulseAtLocation(10.0f * MuzzleRotation.Vector() * Range, ResHit.ImpactPoint);
+			if (isHit) {
+				if (ResHit.GetComponent()->IsSimulatingPhysics()){
+					ResHit.GetComponent()->AddImpulseAtLocation(10.0f * MuzzleRotation.Vector() * Range, ResHit.ImpactPoint);
+				}
+				if (ResHit.GetActor()->CanBeDamaged()){
+					FPointDamageEvent ev;
+					ResHit.GetActor()->TakeDamage(Damage, ev, Controller, this);
+				}
 			}
 			this->CurrentAmmo -= 1;
 		}

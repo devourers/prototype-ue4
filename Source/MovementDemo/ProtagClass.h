@@ -71,10 +71,10 @@ public:
 	UPROPERTY(VisibleAnywhere)
 		UCharacterMovementComponent* ProtagMovement;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Audio)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Inventory)
 		TArray<TSubclassOf<class AWeaponBase>> WeaponInventoryClasess;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Audio)
+	UPROPERTY()
 		TArray<class AWeaponBase*> WeaponInventory;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)

@@ -142,13 +142,13 @@ void AProtagClass::Fire() {
 
 		FRotator MuzzleRotation = CameraRotation;
 		CameraRotation.Pitch += 10.0f;
-		WeaponInventory[current_weapon]->AttackWithWeapon(MuzzleLocation, MuzzleRotation); //TODO is it right?
+		WeaponInventory[current_weapon]->AttackWithWeapon(MuzzleLocation, MuzzleRotation, Controller);
 	}
 }
 
 void AProtagClass::Reload() {
 	if (WeaponInventory[current_weapon]->CurrentAmmo != WeaponInventory[current_weapon]->Magazine && WeaponInventory[current_weapon]->AmmoCount > 0){
-		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("I Am Reloading"));
+		//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("I Am Reloading"));
 		WeaponInventory[current_weapon]->Reload();
 	}
 }

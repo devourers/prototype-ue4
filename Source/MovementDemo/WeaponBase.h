@@ -50,6 +50,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = " Damage ")
 		float Range;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = " Damage ")
+		float Damage;
+
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Audio)
 		USoundBase* SB_shot;
 
@@ -66,7 +69,7 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	virtual void AttackWithWeapon(const FVector& MuzzleLocation, const FRotator& MuzzleRotation);
+	virtual void AttackWithWeapon(const FVector& MuzzleLocation, const FRotator& MuzzleRotation, AController* Controller);
 	virtual void Reload();
 	virtual void StopReload();
 	FTimerHandle ReloadHandler;
