@@ -44,7 +44,7 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = " Ammo ")
 		int AmmoCount;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 		int CurrentAmmo;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = " Damage ")
