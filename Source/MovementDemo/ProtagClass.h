@@ -59,7 +59,7 @@ public:
 	UFUNCTION()
 		void CanSwitchAgain();
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		int current_weapon;
 
 	UPROPERTY(VisibleAnywhere)
@@ -89,9 +89,4 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float Health;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		int EquippedWeapon;
-
-
 };
