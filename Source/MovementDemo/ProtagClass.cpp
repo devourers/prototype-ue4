@@ -28,6 +28,12 @@ AProtagClass::AProtagClass()
 	GetMesh()->SetOwnerNoSee(true);
 	ProtagMovement = GetCharacterMovement();
 
+	HoldingComponent = CreateDefaultSubobject<USceneComponent>(TEXT("HoldingComponent"));
+	HoldingComponent->SetRelativeLocation(FVector(50.0f, 0.0f, 0.0f));
+	HoldingComponent->SetupAttachment(ProtagMesh);
+
+	CurrentItem = NULL;
+
 }
 
 // Called when the game starts or when spawned
@@ -83,8 +89,25 @@ void AProtagClass::Tick(float DeltaTime)
 	GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Green, current_weapon_log);
 	GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Green, ammo_log);
 	GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Green, can_switch_weapons_log);
+
+
 	if (!can_bhop && !ProtagMovement->IsFalling()) {
 		ProtagMovement->MaxWalkSpeed = 600;
+	}
+
+	InteractStart = ProtagCameraComponent->GetComponentLocation();
+	ForwardVector = ProtagCameraComponent->GetForwardVector();
+	InteractFinish = ((ForwardVector * 500.0f) + InteractStart);
+
+	if (!isHolding) {
+		if (GetWorld()->LineTraceSingleByChannel(InteractHit, InteractStart, InteractFinish, ECC_Visibility, DefaultComponentQueryParams, DefaultResponseParam)) {
+			if (InteractHit.GetActor()->GetClass()->IsChildOf(AInteractableObject::StaticClass())) {
+				CurrentItem = Cast<AInteractableObject>(InteractHit.GetActor());
+			}
+		}
+		else {
+			CurrentItem = NULL;
+		}
 	}
 }
 
@@ -101,6 +124,7 @@ void AProtagClass::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AProtagClass::Fire);
 	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &AProtagClass::Reload);
 	PlayerInputComponent->BindAction("Inventory", IE_Pressed, this, &AProtagClass::SwitchWeapons);
+	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AProtagClass::Interact);
 }
 
 void AProtagClass::MoveForward(float value) {
@@ -132,17 +156,28 @@ void AProtagClass::StopJump() {
 }
 
 void AProtagClass::Fire() {
-	if (WeaponInventory[current_weapon] && WeaponInventory[current_weapon]->CurrentAmmo != 0) {
-		FVector CameraLocation;
-		FRotator CameraRotation;
-		GetActorEyesViewPoint(CameraLocation, CameraRotation);
-		MuzzleOffset.Set(100.0f, 0.0f, 0.0f);
+	if (!isHolding){
+		if (WeaponInventory[current_weapon] && WeaponInventory[current_weapon]->CurrentAmmo != 0) {
+			FVector CameraLocation;
+			FRotator CameraRotation;
+			GetActorEyesViewPoint(CameraLocation, CameraRotation);
+			MuzzleOffset.Set(100.0f, 0.0f, 0.0f);
 
-		FVector MuzzleLocation = CameraLocation + FTransform(CameraRotation).TransformVector(MuzzleOffset);
+			FVector MuzzleLocation = CameraLocation + FTransform(CameraRotation).TransformVector(MuzzleOffset);
 
-		FRotator MuzzleRotation = CameraRotation;
-		CameraRotation.Pitch += 10.0f;
-		WeaponInventory[current_weapon]->AttackWithWeapon(MuzzleLocation, MuzzleRotation, Controller);
+			FRotator MuzzleRotation = CameraRotation;
+			CameraRotation.Pitch += 10.0f;
+			WeaponInventory[current_weapon]->AttackWithWeapon(MuzzleLocation, MuzzleRotation, Controller);
+		}
+	}
+	else {
+		CurrentItem->Launch();
+		isHolding = false;
+		CurrentItem = NULL;
+		ProtagMesh->SetOwnerNoSee(false);
+		can_switch = true;
+		WeaponInventory[current_weapon]->WeaponMeshComponent->SetOwnerNoSee(false);
+
 	}
 }
 
@@ -177,4 +212,30 @@ void AProtagClass::SwitchWeapons() {
 
 void AProtagClass::CanSwitchAgain() {
 	can_switch = true;
+}
+
+void AProtagClass::Interact() {
+	if (CurrentItem && !isHolding) {
+		ProtagMesh->SetOwnerNoSee(true);
+		WeaponInventory[current_weapon]->WeaponMeshComponent->SetOwnerNoSee(true);
+		can_switch = false;
+		ToggleItemPick();
+	}
+	else if (CurrentItem && isHolding) {
+		ProtagMesh->SetOwnerNoSee(false);
+		WeaponInventory[current_weapon]->WeaponMeshComponent->SetOwnerNoSee(false);
+		can_switch = true;
+		ToggleItemPick();
+	}
+}
+
+void AProtagClass::ToggleItemPick() {
+	if (CurrentItem)
+	{
+		isHolding = !isHolding;
+		CurrentItem->Pickup();
+		if (!isHolding) {
+			CurrentItem = NULL;
+		}
+	}
 }

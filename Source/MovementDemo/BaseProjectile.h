@@ -33,6 +33,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = " Damage ")
 		float Range;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = " Damage ")
+		float Radius;
+
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = " Projectile ")
 		USphereComponent* CollisionComponent;
 

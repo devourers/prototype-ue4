@@ -78,7 +78,7 @@ void ABaseProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActo
 	}
 	else if (pType == ProjectileTypes::Explode) {
 		//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Firing Projectile"));
-		FCollisionShape onHitColl = FCollisionShape::MakeSphere(600.0f);
+		FCollisionShape onHitColl = FCollisionShape::MakeSphere(Radius);
 		FVector MyLocation = GetActorLocation();
 		FVector Start = MyLocation;
 		FVector End = MyLocation;
@@ -88,10 +88,12 @@ void ABaseProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActo
 			auto* HitComp = Hit.GetComponent();
 			if (Hit.GetActor()->CanBeDamaged()) {
 				FRadialDamageEvent ev;
-				Hit.GetActor()->TakeDamage(Damage, ev, GetInstigatorController(), this);
+				float DamageFalloff = 1.0f;
+				DamageFalloff = FMath::Clamp(DamageFalloff, (Hit.GetActor()->GetActorLocation() - MyLocation).Size() / Radius, 1.0f);
+				Hit.GetActor()->TakeDamage(Damage * DamageFalloff, ev, GetInstigatorController(), this);
 			}
-			if (HitComp) {
-				HitComp->AddRadialImpulse(Hit.ImpactPoint, 600.0f, PrMovementComponent->Velocity.Size() * 10.0f, ERadialImpulseFalloff::RIF_Constant);
+			if (HitComp && HitComp->IsSimulatingPhysics() == true) {
+				HitComp->AddRadialImpulse(Hit.ImpactPoint, Radius, PrMovementComponent->Velocity.Size() * 10.0f, ERadialImpulseFalloff::RIF_Constant);
 			}
 		}
 

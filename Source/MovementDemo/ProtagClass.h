@@ -7,9 +7,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/Character.h"
-#include "ExplosionGun.h"
-#include "Bullet.h"
 #include "WeaponBase.h"
+#include "InteractableObject.h"
 #include "ProtagClass.generated.h"
 
 UCLASS()
@@ -59,6 +58,12 @@ public:
 	UFUNCTION()
 		void CanSwitchAgain();
 
+	UFUNCTION()
+		void Interact();
+
+	UFUNCTION()
+		void ToggleItemPick();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		int current_weapon;
 
@@ -80,13 +85,30 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 		FVector MuzzleOffset;
 
-	bool can_bhop = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float Health;
 
+	//Interacting with items
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+		class USceneComponent* HoldingComponent;
+
+	UPROPERTY()
+		bool isHolding;
+
+	UPROPERTY(EditAnywhere)
+		class AInteractableObject* CurrentItem;
+
+	//Timer Handlers
 	FTimerHandle BhopHandler;
 	FTimerHandle SwitchHandler;
 
+	//gameplay in-code logic
+	FVector InteractStart;
+	FVector InteractFinish;
+	FVector ForwardVector;
+	FHitResult InteractHit;
+	FComponentQueryParams DefaultComponentQueryParams;
+	FCollisionResponseParams DefaultResponseParam;
+	bool can_bhop = false;
 	bool can_switch = true;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		float Health;
 };
