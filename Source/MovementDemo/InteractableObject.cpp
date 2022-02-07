@@ -49,8 +49,6 @@ void AInteractableObject::BeginPlay()
 void AInteractableObject::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	std::string ll = "Is Launched: " + std::to_string(launched);
-	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString(ll.c_str()));
 	if (bHolding && HoldingComp) {
 		SetActorLocationAndRotation(HoldingComp->GetComponentLocation(), HoldingComp->GetComponentRotation());
 	}
@@ -77,9 +75,7 @@ void AInteractableObject::Launch() {
 }
 
 void AInteractableObject::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit) {
-	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, TEXT("Cube hit not launched"));
 	if (launched) {
-		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, TEXT("Cube hit"));
 		if (OtherActor->CanBeDamaged()) {
 			FPointDamageEvent ev;
 			OtherActor->TakeDamage(Damage, ev, HoldingComp->GetOwner()->GetInstigatorController(), this);

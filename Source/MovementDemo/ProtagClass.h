@@ -64,6 +64,14 @@ public:
 	UFUNCTION()
 		void ToggleItemPick();
 
+	UFUNCTION()
+		void ToggleCrouch();
+
+	UFUNCTION()
+		void Lean();
+	UFUNCTION()
+		void StopLean();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		int current_weapon;
 
@@ -79,7 +87,7 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Inventory)
 		TArray<TSubclassOf<class AWeaponBase>> WeaponInventoryClasess;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Inventory)
 		TArray<class AWeaponBase*> WeaponInventory;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
@@ -111,4 +119,6 @@ public:
 	FCollisionResponseParams DefaultResponseParam;
 	bool can_bhop = false;
 	bool can_switch = true;
+	bool is_crouching = false;
+	bool is_leaning = false;
 };

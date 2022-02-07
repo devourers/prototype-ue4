@@ -41,12 +41,13 @@ void ADummyTarget::Tick(float DeltaTime)
 
 float ADummyTarget::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	if (CurrentHealth > 0.0){
 	CurrentHealth -= DamageAmount;
-	if (CurrentHealth <= 0.0) {
-		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Blue, TEXT("Now I am dead."));
-		DummyMesh->SetAllBodiesSimulatePhysics(true);
-		DummyMesh->SetSimulatePhysics(true);
-		DummyMesh->WakeAllRigidBodies();
+		if (CurrentHealth <= 0.0) {
+			DummyMesh->SetAllBodiesSimulatePhysics(true);
+			DummyMesh->SetSimulatePhysics(true);
+			DummyMesh->WakeAllRigidBodies();
+		}
 	}
 	return DamageAmount;
 }

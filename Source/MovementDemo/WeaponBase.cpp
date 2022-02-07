@@ -70,12 +70,12 @@ void AWeaponBase::AttackWithWeapon(const FVector& MuzzleLocation, const FRotator
 			DrawDebugLine(GetWorld(), Start, End, FColor::Green, true);
 			bool isHit = GetWorld()->LineTraceSingleByChannel(ResHit, Start, End, ECC_Visibility, c_q_params);
 			if (isHit) {
-				if (ResHit.GetComponent()->IsSimulatingPhysics()){
-					ResHit.GetComponent()->AddImpulseAtLocation(10.0f * MuzzleRotation.Vector() * Range, ResHit.ImpactPoint);
-				}
-				if (ResHit.GetActor()->CanBeDamaged()){
+				if (ResHit.GetActor()->CanBeDamaged()) {
 					FPointDamageEvent ev;
 					ResHit.GetActor()->TakeDamage(Damage, ev, Controller, this);
+				}
+				if (ResHit.GetComponent()->IsSimulatingPhysics()){
+					ResHit.GetComponent()->AddImpulseAtLocation(MuzzleRotation.Vector() * Range, ResHit.ImpactPoint);
 				}
 			}
 			this->CurrentAmmo -= 1;

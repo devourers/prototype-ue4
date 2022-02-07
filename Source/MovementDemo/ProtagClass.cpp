@@ -17,7 +17,6 @@ AProtagClass::AProtagClass()
 	ProtagCameraComponent->SetupAttachment(CastChecked<USceneComponent, UCapsuleComponent>(GetCapsuleComponent()));
 	ProtagCameraComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 50.0f + BaseEyeHeight));
 	ProtagCameraComponent->bUsePawnControlRotation = true;
-
 	ProtagMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("ArmsComponent"));
 	check(ProtagMesh != nullptr);
 
@@ -84,8 +83,6 @@ void AProtagClass::Tick(float DeltaTime)
 	FString can_switch_weapons_log = FString(cswl.c_str());
 
 	GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Green, curr_speed);
-	GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Green, can_bhop_log);
-	GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Green, is_falling_log);
 	GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Green, current_weapon_log);
 	GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Green, ammo_log);
 	GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Green, can_switch_weapons_log);
@@ -125,6 +122,9 @@ void AProtagClass::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &AProtagClass::Reload);
 	PlayerInputComponent->BindAction("Inventory", IE_Pressed, this, &AProtagClass::SwitchWeapons);
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AProtagClass::Interact);
+	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &AProtagClass::ToggleCrouch);
+	PlayerInputComponent->BindAction("Lean", IE_Pressed, this, &AProtagClass::Lean);
+	PlayerInputComponent->BindAction("Lean", IE_Released, this, &AProtagClass::StopLean);
 }
 
 void AProtagClass::MoveForward(float value) {
@@ -182,6 +182,7 @@ void AProtagClass::Fire() {
 }
 
 void AProtagClass::Reload() {
+
 	if (WeaponInventory[current_weapon]->CurrentAmmo != WeaponInventory[current_weapon]->Magazine && WeaponInventory[current_weapon]->AmmoCount > 0){
 		//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("I Am Reloading"));
 		WeaponInventory[current_weapon]->Reload();
@@ -237,5 +238,62 @@ void AProtagClass::ToggleItemPick() {
 		if (!isHolding) {
 			CurrentItem = NULL;
 		}
+	}
+}
+
+void AProtagClass::ToggleCrouch() {
+	
+	if (!is_crouching) {
+		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Crouching"));
+		this->Crouch(true);
+		is_crouching = true;
+	}
+	else if (is_crouching) {
+		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("UnCrouching"));
+		this->UnCrouch(true);
+		is_crouching = false;
+	}
+}
+
+void AProtagClass::Lean() {
+	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, TEXT("Started Leaning"));
+	APlayerController* inp = GetWorld()->GetFirstPlayerController();
+	FVector curr_camera_location = ProtagCameraComponent->GetRelativeLocation();
+	FRotator curr_camera_rotation = ProtagCameraComponent->GetRelativeRotation();
+	if (inp->WasInputKeyJustReleased(EKeys::Q)) {
+		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, TEXT("Q"));
+		FTransform QRelease;
+		QRelease.SetLocation(curr_camera_location);
+		QRelease.SetRotation(FQuat(FRotator(0 + 15.0f, 0, 0)));
+		ProtagCameraComponent->SetRelativeTransform(QRelease);
+	}
+	if (inp->WasInputKeyJustReleased(EKeys::E)) {
+		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, TEXT("E"));
+		FTransform ERelease;
+		ERelease.SetLocation(curr_camera_location);
+		ERelease.SetRotation(FQuat(FRotator(0 - 15.0f, 0, 0)));
+		ProtagCameraComponent->SetRelativeTransform(ERelease);
+	}
+}
+
+
+void AProtagClass::StopLean() {
+	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, TEXT("Stopped Leaning"));
+	APlayerController* inp = GetWorld()->GetFirstPlayerController();
+	FVector curr_camera_location = ProtagCameraComponent->GetRelativeLocation();
+	FRotator curr_camera_rotation = ProtagCameraComponent->GetRelativeRotation();
+	if (inp->WasInputKeyJustReleased(EKeys::Q)) {
+		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, TEXT("Q"));
+		FTransform QRelease;
+		QRelease.SetLocation(curr_camera_location);
+		QRelease.SetRotation(FQuat(FRotator(0 - 15.0f, 0, 0)));
+		ProtagCameraComponent->SetRelativeTransform(QRelease);
+	}
+	if (inp->WasInputKeyJustReleased(EKeys::E)) {
+		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, TEXT("E"));
+		FTransform ERelease;
+		ERelease.SetLocation(curr_camera_location);
+		ERelease.SetRotation(FQuat(FRotator(0 + 15.0f, 0, 0)));
+		ProtagCameraComponent->SetRelativeTransform(ERelease);
 	}
 }
