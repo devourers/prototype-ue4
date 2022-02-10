@@ -88,7 +88,7 @@ void AProtagClass::Tick(float DeltaTime)
 	GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Green, can_switch_weapons_log);
 
 
-	if (!can_bhop && !ProtagMovement->IsFalling()) {
+	if (!can_bhop && !ProtagMovement->IsFalling() && !is_sprinting) {
 		ProtagMovement->MaxWalkSpeed = 600;
 	}
 
@@ -125,6 +125,8 @@ void AProtagClass::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &AProtagClass::ToggleCrouch);
 	PlayerInputComponent->BindAction("Lean", IE_Pressed, this, &AProtagClass::Lean);
 	PlayerInputComponent->BindAction("Lean", IE_Released, this, &AProtagClass::StopLean);
+	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AProtagClass::Sprint);
+	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AProtagClass::StopSprint);
 }
 
 void AProtagClass::MoveForward(float value) {
@@ -141,7 +143,7 @@ void AProtagClass::StartJump() {
 	bPressedJump = true;
 	if (can_bhop) {
 		ProtagMovement->MaxWalkSpeed += 50;
-		ProtagMovement->MaxWalkSpeed = FMath::Clamp(ProtagMovement->MaxWalkSpeed, 600.0f, 800.0f);
+		ProtagMovement->MaxWalkSpeed = FMath::Clamp(ProtagMovement->MaxWalkSpeed, 600.0f, 1000.0f);
 	}
 }
 
@@ -156,7 +158,7 @@ void AProtagClass::StopJump() {
 }
 
 void AProtagClass::Fire() {
-	if (!isHolding){
+	if (!isHolding && !is_sprinting){
 		if (WeaponInventory[current_weapon] && WeaponInventory[current_weapon]->CurrentAmmo != 0) {
 			FVector CameraLocation;
 			FRotator CameraRotation;
@@ -170,7 +172,7 @@ void AProtagClass::Fire() {
 			WeaponInventory[current_weapon]->AttackWithWeapon(MuzzleLocation, MuzzleRotation, Controller);
 		}
 	}
-	else {
+	else if (isHolding && !is_sprinting){
 		CurrentItem->Launch();
 		isHolding = false;
 		CurrentItem = NULL;
@@ -267,7 +269,7 @@ void AProtagClass::Lean() {
 		QRelease.SetRotation(FQuat(FRotator(0 + 15.0f, 0, 0)));
 		ProtagCameraComponent->SetRelativeTransform(QRelease);
 	}
-	if (inp->WasInputKeyJustReleased(EKeys::E)) {
+	else if (inp->WasInputKeyJustReleased(EKeys::E)) {
 		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, TEXT("E"));
 		FTransform ERelease;
 		ERelease.SetLocation(curr_camera_location);
@@ -289,11 +291,27 @@ void AProtagClass::StopLean() {
 		QRelease.SetRotation(FQuat(FRotator(0 - 15.0f, 0, 0)));
 		ProtagCameraComponent->SetRelativeTransform(QRelease);
 	}
-	if (inp->WasInputKeyJustReleased(EKeys::E)) {
+	else if (inp->WasInputKeyJustReleased(EKeys::E)) {
 		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, TEXT("E"));
 		FTransform ERelease;
 		ERelease.SetLocation(curr_camera_location);
 		ERelease.SetRotation(FQuat(FRotator(0 + 15.0f, 0, 0)));
 		ProtagCameraComponent->SetRelativeTransform(ERelease);
+	}
+}
+
+void AProtagClass::Sprint() {
+	if (!is_sprinting){
+		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, TEXT("Started Sprinting"));
+		ProtagMovement->MaxWalkSpeed += 200;
+		is_sprinting = true;
+	}
+}
+
+void AProtagClass::StopSprint() {
+	if (is_sprinting) {
+		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, TEXT("Stopped Sprinting"));
+		ProtagMovement->MaxWalkSpeed -= 200;
+		is_sprinting = false;
 	}
 }

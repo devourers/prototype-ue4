@@ -4,6 +4,7 @@
 #include "WeaponBase.h"
 #include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
+#include "NiagaraFunctionLibrary.h"
 #include <string>
 
 // Sets default values
@@ -16,7 +17,8 @@ AWeaponBase::AWeaponBase()
 	}
 	WeaponMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Skeletal Mesh"));
 	RootComponent = WeaponMeshComponent;
-	
+	SpawnPoint = CreateDefaultSubobject<USphereComponent>(TEXT("Spawn point"));
+	SpawnPoint->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned
@@ -43,6 +45,9 @@ void AWeaponBase::AttackWithWeapon(const FVector& MuzzleLocation, const FRotator
 			//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Playing sound"));
 			UGameplayStatics::PlaySoundAtLocation(this, SB_shot, GetActorLocation());
 		}
+		if (ShotEffect != nullptr) {
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ShotEffect, SpawnPoint->GetComponentLocation(), MuzzleRotation);
+		}
 		if (wType == EWeaponTypes::eWT_Melee) {
 			//TODO
 		}
@@ -53,7 +58,7 @@ void AWeaponBase::AttackWithWeapon(const FVector& MuzzleLocation, const FRotator
 				FActorSpawnParameters SpawnParams;
 				SpawnParams.Owner = this;
 				SpawnParams.Instigator = GetInstigator();
-				Projectile = World->SpawnActor<ABaseProjectile>(ProjectileClass, MuzzleLocation, MuzzleRotation, SpawnParams);
+				Projectile = World->SpawnActor<ABaseProjectile>(ProjectileClass, SpawnPoint->GetComponentLocation(), MuzzleRotation, SpawnParams);
 				if (Projectile) {
 					FVector LaunchDirection = MuzzleRotation.Vector();
 					Projectile->FireInDirection(LaunchDirection);
@@ -64,18 +69,20 @@ void AWeaponBase::AttackWithWeapon(const FVector& MuzzleLocation, const FRotator
 		else if (wType == EWeaponTypes::eWT_RangedHitScan) {
 			check(GEngine != nullptr);
 			FHitResult ResHit;
-			FVector Start = MuzzleLocation;
+			FVector Start = SpawnPoint->GetComponentLocation();
 			FVector End = Start + MuzzleRotation.Vector() * Range;
 			FCollisionQueryParams c_q_params;
-			DrawDebugLine(GetWorld(), Start, End, FColor::Green, true);
 			bool isHit = GetWorld()->LineTraceSingleByChannel(ResHit, Start, End, ECC_Visibility, c_q_params);
 			if (isHit) {
 				if (ResHit.GetActor()->CanBeDamaged()) {
 					FPointDamageEvent ev;
 					ResHit.GetActor()->TakeDamage(Damage, ev, Controller, this);
 				}
+				if (HitScanEffect != nullptr) {
+					UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), HitScanEffect, ResHit.ImpactPoint);
+				}
 				if (ResHit.GetComponent()->IsSimulatingPhysics()){
-					ResHit.GetComponent()->AddImpulseAtLocation(MuzzleRotation.Vector() * Range, ResHit.ImpactPoint);
+					ResHit.GetComponent()->AddImpulseAtLocation(MuzzleRotation.Vector() * 10.0f * Range, ResHit.ImpactPoint);
 				}
 			}
 			this->CurrentAmmo -= 1;

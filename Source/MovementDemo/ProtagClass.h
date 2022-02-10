@@ -69,8 +69,15 @@ public:
 
 	UFUNCTION()
 		void Lean();
+
 	UFUNCTION()
 		void StopLean();
+
+	UFUNCTION()
+		void Sprint();
+
+	UFUNCTION()
+		void StopSprint();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		int current_weapon;
@@ -121,4 +128,5 @@ public:
 	bool can_switch = true;
 	bool is_crouching = false;
 	bool is_leaning = false;
+	bool is_sprinting = false;
 };

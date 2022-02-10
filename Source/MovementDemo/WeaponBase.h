@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "BaseProjectile.h"
+#include "Components/SphereComponent.h"
 #include "WeaponBase.generated.h"
 
 UENUM(BlueprintType)
@@ -34,6 +35,15 @@ public:
 	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = " Projectile ")
 		TSubclassOf<class ABaseProjectile> ProjectileClass;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = " Projectile ")
+		USphereComponent* SpawnPoint;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = " FX ")
+		class UNiagaraSystem* HitScanEffect;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = " FX ")
+		class UNiagaraSystem* ShotEffect;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = " Projectile ")
 		class ABaseProjectile* Projectile;

@@ -2,6 +2,8 @@
 
 
 #include "BaseProjectile.h"
+#include "NiagaraFunctionLibrary.h"
+#include <string>
 
 // Sets default values
 ABaseProjectile::ABaseProjectile()
@@ -84,6 +86,9 @@ void ABaseProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActo
 		FVector End = MyLocation;
 		TArray<FHitResult> OutHits;
 		bool isHit = GetWorld()->SweepMultiByChannel(OutHits, Start, End, FQuat::Identity, ECC_WorldStatic, onHitColl);
+		if (ProjectileEffect != nullptr){
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ProjectileEffect, MyLocation);
+		}
 		for (auto& Hit : OutHits) {
 			auto* HitComp = Hit.GetComponent();
 			if (Hit.GetActor()->CanBeDamaged()) {

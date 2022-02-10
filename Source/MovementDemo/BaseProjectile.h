@@ -48,6 +48,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = " Movement ")
 		UMaterialInstanceDynamic* PrMaterialInstance;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = " FX ")
+		class UNiagaraSystem* ProjectileEffect;
+
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = " Movement ")
 		bool DoesRichochet;
 
