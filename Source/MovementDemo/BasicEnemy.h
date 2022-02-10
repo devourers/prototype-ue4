@@ -34,11 +34,19 @@ public:
 
 	UPROPERTY()
 		float CurrentHealth;
-	UPROPERTY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Health)
 		float MaxHealth;
 
 private:
 	UFUNCTION()
 		void OnPlayerCaught(APawn* pawn);
 
+	UFUNCTION()
+		virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
+	UFUNCTION()
+		void Die();
+
+	FTimerHandle DeathHandler;
 };
