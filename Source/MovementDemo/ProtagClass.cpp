@@ -15,7 +15,7 @@ AProtagClass::AProtagClass()
 	ProtagCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("ProtagCamera"));
 	check(ProtagCameraComponent != nullptr);
 	ProtagCameraComponent->SetupAttachment(CastChecked<USceneComponent, UCapsuleComponent>(GetCapsuleComponent()));
-	ProtagCameraComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 50.0f + BaseEyeHeight));
+	ProtagCameraComponent->SetRelativeLocation(FVector(0.0f, 0.0f, BaseEyeHeight));
 	ProtagCameraComponent->bUsePawnControlRotation = true;
 	ProtagMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("ArmsComponent"));
 	check(ProtagMesh != nullptr);
@@ -63,6 +63,9 @@ void AProtagClass::BeginPlay()
 void AProtagClass::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	SetCameraPos();
+
 	FVector curr_vel = this->GetVelocity();
 	std::string log_speeds = "Current speed: " + std::to_string(curr_vel.Size());
 	FString curr_speed = FString(log_speeds.c_str());
@@ -108,6 +111,16 @@ void AProtagClass::Tick(float DeltaTime)
 	}
 }
 
+void AProtagClass::SetCameraPos() {
+	float collisionCenterZ = GetCapsuleComponent()->GetRelativeLocation().Z;
+	float height = collisionCenterZ + BaseEyeHeight;
+	float leanRad = FMath::DegreesToRadians(MaxLeanAngle) * LeanAmount;
+	FQuat leanRot = FQuat(FVector(1, 0, 0), -leanRad);
+	FVector eyePos = FVector(0, 0, height * (1 - LeanHeightRatio)) + leanRot.RotateVector(FVector(0, 0, height * LeanHeightRatio));
+	ProtagCameraComponent->SetRelativeLocation(eyePos - FVector(0, 0, collisionCenterZ));
+	ProtagCameraComponent->SetWorldRotation(FRotator(GetControlRotation().Quaternion() * leanRot));
+}
+
 // Called to bind functionality to input
 void AProtagClass::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -123,10 +136,25 @@ void AProtagClass::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAction("Inventory", IE_Pressed, this, &AProtagClass::SwitchWeapons);
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AProtagClass::Interact);
 	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &AProtagClass::ToggleCrouch);
-	PlayerInputComponent->BindAction("Lean", IE_Pressed, this, &AProtagClass::Lean);
-	PlayerInputComponent->BindAction("Lean", IE_Released, this, &AProtagClass::StopLean);
+	PlayerInputComponent->BindAxis("Lean", this, &AProtagClass::Lean);
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AProtagClass::Sprint);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AProtagClass::StopSprint);
+}
+
+
+void AProtagClass::AddControllerPitchYawInput(float pitch, float yaw) {
+	float angle = MaxLeanAngle * LeanAmount;
+	FVector2D fixed = FVector2D(pitch, yaw).GetRotated(-angle);
+	Super::AddControllerYawInput(fixed.Y);
+	Super::AddControllerPitchInput(fixed.X);
+}
+
+void AProtagClass::AddControllerYawInput(float Val) {
+	AddControllerPitchYawInput(0, Val);
+}
+
+void AProtagClass::AddControllerPitchInput(float Val) {
+	AddControllerPitchYawInput(Val, 0);
 }
 
 void AProtagClass::MoveForward(float value) {
@@ -257,47 +285,8 @@ void AProtagClass::ToggleCrouch() {
 	}
 }
 
-void AProtagClass::Lean() {
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, TEXT("Started Leaning"));
-	APlayerController* inp = GetWorld()->GetFirstPlayerController();
-	FVector curr_camera_location = ProtagCameraComponent->GetRelativeLocation();
-	FRotator curr_camera_rotation = ProtagCameraComponent->GetRelativeRotation();
-	if (inp->WasInputKeyJustReleased(EKeys::Q)) {
-		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, TEXT("Q"));
-		FTransform QRelease;
-		QRelease.SetLocation(curr_camera_location);
-		QRelease.SetRotation(FQuat(FRotator(0 + 15.0f, 0, 0)));
-		ProtagCameraComponent->SetRelativeTransform(QRelease);
-	}
-	else if (inp->WasInputKeyJustReleased(EKeys::E)) {
-		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, TEXT("E"));
-		FTransform ERelease;
-		ERelease.SetLocation(curr_camera_location);
-		ERelease.SetRotation(FQuat(FRotator(0 - 15.0f, 0, 0)));
-		ProtagCameraComponent->SetRelativeTransform(ERelease);
-	}
-}
-
-
-void AProtagClass::StopLean() {
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, TEXT("Stopped Leaning"));
-	APlayerController* inp = GetWorld()->GetFirstPlayerController();
-	FVector curr_camera_location = ProtagCameraComponent->GetRelativeLocation();
-	FRotator curr_camera_rotation = ProtagCameraComponent->GetRelativeRotation();
-	if (inp->WasInputKeyJustReleased(EKeys::Q)) {
-		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, TEXT("Q"));
-		FTransform QRelease;
-		QRelease.SetLocation(curr_camera_location);
-		QRelease.SetRotation(FQuat(FRotator(0 - 15.0f, 0, 0)));
-		ProtagCameraComponent->SetRelativeTransform(QRelease);
-	}
-	else if (inp->WasInputKeyJustReleased(EKeys::E)) {
-		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, TEXT("E"));
-		FTransform ERelease;
-		ERelease.SetLocation(curr_camera_location);
-		ERelease.SetRotation(FQuat(FRotator(0 + 15.0f, 0, 0)));
-		ProtagCameraComponent->SetRelativeTransform(ERelease);
-	}
+void AProtagClass::Lean(float d) {
+	LeanAmount = d;
 }
 
 void AProtagClass::Sprint() {
