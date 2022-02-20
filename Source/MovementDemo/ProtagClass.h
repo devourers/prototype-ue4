@@ -31,6 +31,10 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual void AddControllerYawInput(float Val) override;
+	virtual void AddControllerPitchInput(float Val) override;
+	void AddControllerPitchYawInput(float pitch, float yaw);
+
 	UFUNCTION()
 		void MoveRight(float value);
 
@@ -68,16 +72,16 @@ public:
 		void ToggleCrouch();
 
 	UFUNCTION()
-		void Lean();
-
-	UFUNCTION()
-		void StopLean();
+		void Lean(float v);
 
 	UFUNCTION()
 		void Sprint();
 
 	UFUNCTION()
 		void StopSprint();
+
+	UFUNCTION()
+		void SetCameraPos();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		int current_weapon;
@@ -129,4 +133,11 @@ public:
 	bool is_crouching = false;
 	bool is_leaning = false;
 	bool is_sprinting = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+		float MaxLeanAngle = 35;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+		float LeanHeightRatio = 0.5;
+
+	float LeanAmount = 0;
 };
