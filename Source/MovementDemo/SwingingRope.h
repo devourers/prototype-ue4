@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "CableComponent.h"
+#include "Components/SphereComponent.h"
 #include "SwingingRope.generated.h"
 
 UCLASS()
@@ -14,7 +15,15 @@ class MOVEMENTDEMO_API ASwingingRope : public AActor
 	
 public:	
 	// Sets default values for this actor's properties
-	UCableComponent* cable;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Rope)
+		UCableComponent* RopeComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Rope)
+		TArray<class USphereComponent*> GrabPoints;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Rope)
+		USceneComponent* CurrentGrabPlace;
+
 	ASwingingRope();
 
 protected:
@@ -24,5 +33,10 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
+	UFUNCTION()
+		void GetGrabbed(const USphereComponent& GrabbedSphere);
+	UFUNCTION()
+		void MoveUp();
+	UFUNCTION()
+		void MoveDown();
 };
