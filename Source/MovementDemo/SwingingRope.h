@@ -34,7 +34,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	UFUNCTION()
-		void GetGrabbed(const USphereComponent& GrabbedSphere);
+		void GetGrabbed(const USphereComponent* GrabbedSphere);
 	UFUNCTION()
 		void MoveUp();
 	UFUNCTION()

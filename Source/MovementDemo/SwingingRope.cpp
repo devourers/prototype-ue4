@@ -10,9 +10,6 @@ ASwingingRope::ASwingingRope()
 	PrimaryActorTick.bCanEverTick = true;
 	RopeComponent = CreateDefaultSubobject<UCableComponent>(TEXT("RopeComponent"));
 	RopeComponent->CableLength = 1000.0f;
-	for (int i = 0; i < RopeComponent->CableLength(); i++) {
-
-	}
 	CurrentGrabPlace = CreateDefaultSubobject<USceneComponent>(TEXT("GrabbingComponent"));
 	RootComponent = RopeComponent;
 	CurrentGrabPlace->SetupAttachment(RopeComponent);
@@ -32,8 +29,8 @@ void ASwingingRope::Tick(float DeltaTime)
 
 }
 
-void ASwingingRope::GetGrabbed(const USphereComponent& GrabbedSphere) {
-	CurrentGrabPlace->SetRelativeLocation(GrabbedSphere.GetRelativeLocation());
+void ASwingingRope::GetGrabbed(const USphereComponent* GrabbedSphere) {
+	CurrentGrabPlace->SetRelativeLocation(GrabbedSphere->GetRelativeLocation());
 }
 
 void ASwingingRope::MoveUp() {
