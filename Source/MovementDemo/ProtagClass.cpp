@@ -31,6 +31,20 @@ AProtagClass::AProtagClass()
 	HoldingComponent->SetRelativeLocation(FVector(50.0f, 0.0f, 0.0f));
 	HoldingComponent->SetupAttachment(ProtagMesh);
 
+	//RopeHoldingComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RopeHoldingComponent"));
+	//RopeHoldingComponent->SetupAttachment(ProtagMesh);
+
+	RopeGunComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RopeGunComponent"));
+	RopeGunComponent->SetRelativeLocation(FVector(50.0f, 0.0f, 0.0f));
+	RopeGunComponent->SetupAttachment(ProtagMesh);
+
+	CurrentCable = CreateDefaultSubobject<UCableComponent>(TEXT("RopeGun"));
+	CurrentCable->SetupAttachment(RopeGunComponent);
+	CurrentCable->SetHiddenInGame(true);
+	CurrentCable->bAttachEnd = true;
+	//CurrentCable->CableLength = 100.0f;
+	isRopeGunned = false;
+	
 	CurrentItem = NULL;
 
 }
@@ -40,7 +54,6 @@ void AProtagClass::BeginPlay()
 {
 	Super::BeginPlay();
 	check(GEngine != nullptr);
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("playing as protag"));
 	for (int i = 0; i < WeaponInventoryClasess.Num(); i++) {
 		FActorSpawnParameters gun_params;
 		gun_params.bNoFail = true;
@@ -89,7 +102,7 @@ void AProtagClass::Tick(float DeltaTime)
 	GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Green, current_weapon_log);
 	GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Green, ammo_log);
 	GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Green, can_switch_weapons_log);
-
+	GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Green, FString(std::to_string(CurrentCable->CableLength).c_str()));
 
 	if (!can_bhop && !ProtagMovement->IsFalling() && !is_sprinting) {
 		ProtagMovement->MaxWalkSpeed = 600;
@@ -108,6 +121,9 @@ void AProtagClass::Tick(float DeltaTime)
 		else {
 			CurrentItem = NULL;
 		}
+	}
+	if (isRopeGunned && RopeGunProjectile) {
+		//CurrentCable->CableLength = FMath::Clamp(RopeGunProjectile->TraveledDistance, 0.0f, RopeGunProjectile->TraveledDistance);
 	}
 }
 
@@ -137,8 +153,9 @@ void AProtagClass::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AProtagClass::Interact);
 	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &AProtagClass::ToggleCrouch);
 	PlayerInputComponent->BindAxis("Lean", this, &AProtagClass::Lean);
-	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AProtagClass::Sprint);
-	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AProtagClass::StopSprint);
+	PlayerInputComponent->BindAction("RopeGun", IE_Pressed, this, &AProtagClass::ShootRope);
+	PlayerInputComponent->BindAction("RopeShorter", IE_Pressed, this, &AProtagClass::RopeShorter);
+	PlayerInputComponent->BindAction("RopeLonger", IE_Pressed, this, &AProtagClass::RopeLonger);
 }
 
 
@@ -214,7 +231,6 @@ void AProtagClass::Fire() {
 void AProtagClass::Reload() {
 
 	if (WeaponInventory[current_weapon]->CurrentAmmo != WeaponInventory[current_weapon]->Magazine && WeaponInventory[current_weapon]->AmmoCount > 0){
-		//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("I Am Reloading"));
 		WeaponInventory[current_weapon]->Reload();
 	}
 }
@@ -289,18 +305,45 @@ void AProtagClass::Lean(float d) {
 	LeanAmount = d;
 }
 
-void AProtagClass::Sprint() {
-	if (!is_sprinting){
-		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, TEXT("Started Sprinting"));
-		ProtagMovement->MaxWalkSpeed += 200;
-		is_sprinting = true;
+void AProtagClass::ShootRope() {
+	if (!isRopeGunned) {
+		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Shoot roped"));
+		CurrentCable->SetHiddenInGame(false);
+		isRopeGunned = true;
+		CurrentCable->bAttachEnd = false;
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this;
+		SpawnParams.Instigator = GetInstigator();
+		FVector CameraLocation;
+		FRotator CameraRotation;
+		GetActorEyesViewPoint(CameraLocation, CameraRotation);
+		FRotator MuzzleRotation = CameraRotation;
+		CameraRotation.Pitch += 10.0f;
+		RopeGunProjectile = GetWorld()->SpawnActor<ABaseProjectile>(RopeGunProjectileClass, WeaponInventory[current_weapon]->SpawnPoint->GetComponentLocation(), MuzzleRotation, SpawnParams);
+		//RopeGunProjectile->Range = rope_range;
+		CurrentCable->SetAttachEndToComponent(RopeGunProjectile->GetRootComponent());
+		RopeGunProjectile->FireInDirection(MuzzleRotation.Vector());
+		CurrentCable->bAttachEnd = true;
+	}
+	else {
+		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Retract roped"));
+		CurrentCable->SetHiddenInGame(true);
+		isRopeGunned = false;
+		CurrentCable->CableLength = 0.0f;
 	}
 }
 
-void AProtagClass::StopSprint() {
-	if (is_sprinting) {
-		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, TEXT("Stopped Sprinting"));
-		ProtagMovement->MaxWalkSpeed -= 200;
-		is_sprinting = false;
+void AProtagClass::RopeLonger(){
+	if (isRopeGunned) {
+		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Longer"));
+		CurrentCable->CableLength += 100.0f;
 	}
 }
+
+void AProtagClass::RopeShorter() {
+	if (isRopeGunned) {
+		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Shorter"));
+		CurrentCable->CableLength -= 100.0f;
+	}
+}
+

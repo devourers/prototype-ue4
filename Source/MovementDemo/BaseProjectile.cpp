@@ -24,8 +24,8 @@ ABaseProjectile::ABaseProjectile()
 	if (!PrMovementComponent) {
 		PrMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Movement Component"));
 		PrMovementComponent->SetUpdatedComponent(CollisionComponent);
-		PrMovementComponent->InitialSpeed = 3000.0f;
-		PrMovementComponent->MaxSpeed = 3000.0f;
+		PrMovementComponent->InitialSpeed = 4000.0f;
+		PrMovementComponent->MaxSpeed = 4000.0f;
 		PrMovementComponent->bRotationFollowsVelocity = true;
 		PrMovementComponent->bShouldBounce = true;
 		PrMovementComponent->Bounciness = 0.3f;
@@ -52,16 +52,18 @@ void ABaseProjectile::BeginPlay()
 {
 	Super::BeginPlay();
 	StartingPosition = GetActorLocation();
-	
+	LastLocation = StartingPosition;
 }
 
 // Called every frame
 void ABaseProjectile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if ((GetActorLocation() - StartingPosition).Size() >= Range) {
+	FVector CurrPosition = GetActorLocation();
+	TraveledDistance += (CurrPosition - LastLocation).Size();
+	LastLocation = CurrPosition;
+	if (TraveledDistance >= Range) {
 		Destroy();
-		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Out of range"));
 	}
 }
 
@@ -70,16 +72,21 @@ void ABaseProjectile::FireInDirection(const FVector& ShootDirection) {
 }
 
 void ABaseProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit) {
-	if (pType == ProjectileTypes::Normal) {
+	if (pType == ProjectileTypes::Rope) {
+		TraveledDistance += (GetActorLocation() - LastLocation).Size();
+		Destroy();
+	}
+	else if (pType == ProjectileTypes::Normal) {
+		if (!DoesRichochet) {
+			Destroy();
+		}
 		if (OtherActor != this && OtherComponent->IsSimulatingPhysics()) {
 			OtherComponent->AddImpulseAtLocation(PrMovementComponent->Velocity * 100.0f, Hit.ImpactPoint);
 		}
-		if (!DoesRichochet){
-			Destroy();
-		}
+
 	}
 	else if (pType == ProjectileTypes::Explode) {
-		//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Firing Projectile"));
+		Destroy();
 		FCollisionShape onHitColl = FCollisionShape::MakeSphere(Radius);
 		FVector MyLocation = GetActorLocation();
 		FVector Start = MyLocation;
@@ -101,7 +108,5 @@ void ABaseProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActo
 				HitComp->AddRadialImpulse(Hit.ImpactPoint, Radius, PrMovementComponent->Velocity.Size() * 10.0f, ERadialImpulseFalloff::RIF_Constant);
 			}
 		}
-
-		Destroy();
 	}
 }

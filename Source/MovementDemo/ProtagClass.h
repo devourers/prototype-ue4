@@ -8,6 +8,7 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/Character.h"
 #include "WeaponBase.h"
+#include "CableComponent.h"
 #include "InteractableObject.h"
 #include "ProtagClass.generated.h"
 
@@ -75,13 +76,16 @@ public:
 		void Lean(float v);
 
 	UFUNCTION()
-		void Sprint();
-
-	UFUNCTION()
-		void StopSprint();
-
-	UFUNCTION()
 		void SetCameraPos();
+
+	UFUNCTION()
+		void ShootRope();
+
+	UFUNCTION()
+		void RopeLonger();
+
+	UFUNCTION()
+		void RopeShorter();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		int current_weapon;
@@ -111,8 +115,34 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 		class USceneComponent* HoldingComponent;
 
+	//Interacting with ropes
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+		class USceneComponent* RopeHoldingComponent;
+
+	//RopeGun attachment component
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+		class USceneComponent* RopeGunComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+		float rope_range;
+
 	UPROPERTY()
 		bool isHolding;
+
+	UPROPERTY()
+		bool isRopeGunned;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = RopeGun)
+		class UCableComponent* CurrentCable;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = RopeGun)
+		class ABaseProjectile* RopeGunShooter;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = RopeGun)
+		TSubclassOf<class ABaseProjectile> RopeGunProjectileClass;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = RopeGun)
+		class ABaseProjectile* RopeGunProjectile;
 
 	UPROPERTY(EditAnywhere)
 		class AInteractableObject* CurrentItem;

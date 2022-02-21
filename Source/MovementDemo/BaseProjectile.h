@@ -11,7 +11,8 @@
 UENUM()
 enum ProjectileTypes {
 	Explode UMETA(DisplayName = " Exploding "),
-	Normal UMETA(DisplayName = " Normal ")
+	Normal UMETA(DisplayName = " Normal "),
+	Rope UMETA(Displayname = " Rope ")
 	//TODO
 };
 
@@ -32,6 +33,9 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = " Damage ")
 		float Range;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = " Misc ")
+		float TraveledDistance;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = " Damage ")
 		float Radius;
@@ -60,6 +64,8 @@ protected:
 
 	UPROPERTY()
 		FVector StartingPosition;
+	UPROPERTY()
+		FVector LastLocation;
 
 public:	
 	// Called every frame

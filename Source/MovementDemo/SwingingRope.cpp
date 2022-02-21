@@ -2,6 +2,8 @@
 
 
 #include "SwingingRope.h"
+#include "DrawDebugHelpers.h"
+#include <string>
 
 // Sets default values
 ASwingingRope::ASwingingRope()
@@ -19,14 +21,29 @@ ASwingingRope::ASwingingRope()
 void ASwingingRope::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	//float indexator = RopeComponent->CableLength;
+	/*
+	for (int i = 0; i < int(indexator / 50); i++) {
+		USphereComponent* Current = NewObject<USphereComponent>(this, USphereComponent::StaticClass());
+		Current->SetSphereRadius(50.0f);
+		Current->AttachToComponent(RootComponent, FAttachmentTransformRules::SnapToTargetIncludingScale);
+		Current->SetRelativeLocation(FVector(i * 50.0f, 0.0f, 0.0f));
+		//Current->SetupAttachment(this->RootComponent);
+		//Current->AttachTo(RootComponent, TEXT("NAME_None"), EAttachLocation::SnapToTargetIncludingScale, false);
+		Current->RegisterComponent();
+		//GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Blue, GetTransform().TransformPosition(Current->GetRelativeLocation()).ToString());
+		GrabPoints.Add(Current);
+	}
+	*/
 }
 
 // Called every frame
 void ASwingingRope::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	for (auto& Sphere : GrabPoints) {
+		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Blue, GetTransform().TransformPosition(Sphere->GetRelativeLocation()).ToString());
+	}
 }
 
 void ASwingingRope::GetGrabbed(const USphereComponent* GrabbedSphere) {
