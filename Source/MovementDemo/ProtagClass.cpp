@@ -39,6 +39,7 @@ AProtagClass::AProtagClass()
 	RopeGunComponent->SetupAttachment(ProtagMesh);
 
 	CurrentCable = CreateDefaultSubobject<UCableComponent>(TEXT("RopeGun"));
+	CurrentCable->SetHiddenInGame(true);
 	CurrentCable->SetupAttachment(RopeGunComponent);
 	CurrentCable->SetHiddenInGame(true);
 	CurrentCable->bAttachEnd = true;
@@ -320,6 +321,7 @@ void AProtagClass::ShootRope() {
 		FRotator MuzzleRotation = CameraRotation;
 		CameraRotation.Pitch += 10.0f;
 		RopeGunProjectile = GetWorld()->SpawnActor<ABaseProjectile>(RopeGunProjectileClass, WeaponInventory[current_weapon]->SpawnPoint->GetComponentLocation(), MuzzleRotation, SpawnParams);
+		RopeGunProjectile->SetHidden(true);
 		//RopeGunProjectile->Range = rope_range;
 		CurrentCable->SetAttachEndToComponent(RopeGunProjectile->GetRootComponent());
 		RopeGunProjectile->FireInDirection(MuzzleRotation.Vector());
