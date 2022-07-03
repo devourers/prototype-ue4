@@ -87,6 +87,9 @@ public:
 	UFUNCTION()
 		void RopeShorter();
 
+	UFUNCTION()
+		void BindRopeToNewLocation(AActor* LastActor, FVector pos);
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		int current_weapon;
 

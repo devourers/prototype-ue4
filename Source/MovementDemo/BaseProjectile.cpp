@@ -74,6 +74,8 @@ void ABaseProjectile::FireInDirection(const FVector& ShootDirection) {
 void ABaseProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit) {
 	if (pType == ProjectileTypes::Rope) {
 		TraveledDistance += (GetActorLocation() - LastLocation).Size();
+		LastHitActor = OtherActor;
+		OnProjectileHit.ExecuteIfBound();
 		Destroy();
 	}
 	else if (pType == ProjectileTypes::Normal) {

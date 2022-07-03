@@ -322,16 +322,28 @@ void AProtagClass::ShootRope() {
 		CameraRotation.Pitch += 10.0f;
 		RopeGunProjectile = GetWorld()->SpawnActor<ABaseProjectile>(RopeGunProjectileClass, WeaponInventory[current_weapon]->SpawnPoint->GetComponentLocation(), MuzzleRotation, SpawnParams);
 		RopeGunProjectile->SetHidden(true);
-		//RopeGunProjectile->Range = rope_range;
 		CurrentCable->SetAttachEndToComponent(RopeGunProjectile->GetRootComponent());
 		RopeGunProjectile->FireInDirection(MuzzleRotation.Vector());
+		RopeGunProjectile->OnProjectileHit.BindUFunction(this, TEXT("BindRopeToNewLocation"), RopeGunProjectile->LastHitActor, RopeGunProjectile->LastLocation);
 		CurrentCable->bAttachEnd = true;
 	}
 	else {
 		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Retract roped"));
+		CurrentCable->bAttachEnd = false;
 		CurrentCable->SetHiddenInGame(true);
 		isRopeGunned = false;
 		CurrentCable->CableLength = 0.0f;
+	}
+}
+
+void AProtagClass::BindRopeToNewLocation(AActor* LastActor, FVector pos) {
+	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Executed func"));
+	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, pos.ToString());
+	if (RopeGunProjectile->LastHitActor){
+		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, RopeGunProjectile->LastHitActor->GetName());
+		//CurrentCable->SetAttachEndTo(RopeGunProjectile->LastHitActor, NAME_None);
+		CurrentCable->SetAttachEndToComponent(RopeGunProjectile->LastHitActor->GetRootComponent());
+		CurrentCable->CableLength = RopeGunProjectile->TraveledDistance;
 	}
 }
 

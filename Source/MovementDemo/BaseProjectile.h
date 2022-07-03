@@ -8,6 +8,8 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "BaseProjectile.generated.h"
 
+DECLARE_DELEGATE(FOnProjectileHit);
+
 UENUM()
 enum ProjectileTypes {
 	Explode UMETA(DisplayName = " Exploding "),
@@ -58,21 +60,24 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = " Movement ")
 		bool DoesRichochet;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		AActor* LastHitActor;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	UPROPERTY()
 		FVector StartingPosition;
-	UPROPERTY()
-		FVector LastLocation;
+
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
 	void FireInDirection(const FVector& ShootDirection);
-
+	FOnProjectileHit OnProjectileHit;
+	UPROPERTY()
+		FVector LastLocation;
 	UFUNCTION()
 		void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
 };
