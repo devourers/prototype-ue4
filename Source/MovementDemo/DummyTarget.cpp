@@ -9,13 +9,11 @@ ADummyTarget::ADummyTarget()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	if (!RootComponent) {
-		RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DummySceneComponent"));
-	}
 	if (!DummyMesh) {
 		DummyMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("MeshComponent"));
 		check(DummyMesh != nullptr);
 	}
+	RootComponent = DummyMesh;
 }
 
 // Called when the game starts or when spawned

@@ -350,7 +350,7 @@ void AProtagClass::BindRopeToNewLocation(AActor* LastActor, FVector& pos) {
 	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Executed func"));
 	LastRopeHitActor = RopeGunProjectile->LastHitActor;
 	if (RopeGunProjectile->LastHitActor){
-		UPrimitiveComponent* NewRopeHitLocation = NewObject<UPrimitiveComponent>(RopeGunProjectile->LastHitActor, UPrimitiveComponent::StaticClass(), TEXT("Ropehit"));
+		USceneComponent* NewRopeHitLocation = NewObject<USceneComponent>(RopeGunProjectile->LastHitActor, USceneComponent::StaticClass(), TEXT("Ropehit"));
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, pos.ToString());
 		if (NewRopeHitLocation){
 			NewRopeHitLocation->RegisterComponent();

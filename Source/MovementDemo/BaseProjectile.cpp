@@ -60,7 +60,6 @@ void ABaseProjectile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	FVector CurrPosition = GetActorLocation();
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, LastLocation.ToString());
 	TraveledDistance += (CurrPosition - LastLocation).Size();
 	LastLocation = CurrPosition;
 	if (TraveledDistance >= Range) {
@@ -78,7 +77,6 @@ void ABaseProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActo
 			TraveledDistance += (GetActorLocation() - LastLocation).Size();
 			LastHitActor = OtherActor;
 			HitLocation = Hit.ImpactPoint;
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, HitLocation.ToString());
 			OnProjectileHit.ExecuteIfBound();
 			Destroy();
 		}
@@ -92,7 +90,6 @@ void ABaseProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActo
 
 		}
 		else if (pType == ProjectileTypes::Explode) {
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Black, LastLocation.ToString());
 			Destroy();
 			FCollisionShape onHitColl = FCollisionShape::MakeSphere(Radius);
 			FVector MyLocation = GetActorLocation();
