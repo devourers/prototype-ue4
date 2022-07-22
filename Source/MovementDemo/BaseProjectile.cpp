@@ -60,6 +60,7 @@ void ABaseProjectile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	FVector CurrPosition = GetActorLocation();
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, LastLocation.ToString());
 	TraveledDistance += (CurrPosition - LastLocation).Size();
 	LastLocation = CurrPosition;
 	if (TraveledDistance >= Range) {
@@ -72,42 +73,47 @@ void ABaseProjectile::FireInDirection(const FVector& ShootDirection) {
 }
 
 void ABaseProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit) {
-	if (pType == ProjectileTypes::Rope) {
-		TraveledDistance += (GetActorLocation() - LastLocation).Size();
-		LastHitActor = OtherActor;
-		OnProjectileHit.ExecuteIfBound();
-		Destroy();
-	}
-	else if (pType == ProjectileTypes::Normal) {
-		if (!DoesRichochet) {
+	if (OtherComponent->IsCollisionEnabled()){
+		if (pType == ProjectileTypes::Rope) {
+			TraveledDistance += (GetActorLocation() - LastLocation).Size();
+			LastHitActor = OtherActor;
+			HitLocation = Hit.ImpactPoint;
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, HitLocation.ToString());
+			OnProjectileHit.ExecuteIfBound();
 			Destroy();
 		}
-		if (OtherActor != this && OtherComponent->IsSimulatingPhysics()) {
-			OtherComponent->AddImpulseAtLocation(PrMovementComponent->Velocity * 100.0f, Hit.ImpactPoint);
-		}
-
-	}
-	else if (pType == ProjectileTypes::Explode) {
-		Destroy();
-		FCollisionShape onHitColl = FCollisionShape::MakeSphere(Radius);
-		FVector MyLocation = GetActorLocation();
-		FVector Start = MyLocation;
-		FVector End = MyLocation;
-		TArray<FHitResult> OutHits;
-		bool isHit = GetWorld()->SweepMultiByChannel(OutHits, Start, End, FQuat::Identity, ECC_WorldStatic, onHitColl);
-		if (ProjectileEffect != nullptr){
-			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ProjectileEffect, MyLocation);
-		}
-		for (auto& Hit : OutHits) {
-			auto* HitComp = Hit.GetComponent();
-			if (Hit.GetActor()->CanBeDamaged()) {
-				FRadialDamageEvent ev;
-				float DamageFalloff = 1.0f;
-				DamageFalloff = FMath::Clamp(DamageFalloff, (Hit.GetActor()->GetActorLocation() - MyLocation).Size() / Radius, 1.0f);
-				Hit.GetActor()->TakeDamage(Damage * DamageFalloff, ev, GetInstigatorController(), this);
+		else if (pType == ProjectileTypes::Normal) {
+			if (!DoesRichochet) {
+				Destroy();
 			}
-			if (HitComp && HitComp->IsSimulatingPhysics() == true) {
-				HitComp->AddRadialImpulse(Hit.ImpactPoint, Radius, PrMovementComponent->Velocity.Size() * 10.0f, ERadialImpulseFalloff::RIF_Constant);
+			if (OtherActor != this && OtherComponent->IsSimulatingPhysics()) {
+				OtherComponent->AddImpulseAtLocation(PrMovementComponent->Velocity * 100.0f, Hit.ImpactPoint);
+			}
+
+		}
+		else if (pType == ProjectileTypes::Explode) {
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Black, LastLocation.ToString());
+			Destroy();
+			FCollisionShape onHitColl = FCollisionShape::MakeSphere(Radius);
+			FVector MyLocation = GetActorLocation();
+			FVector Start = MyLocation;
+			FVector End = MyLocation;
+			TArray<FHitResult> OutHits;
+			bool isHit = GetWorld()->SweepMultiByChannel(OutHits, Start, End, FQuat::Identity, ECC_WorldStatic, onHitColl);
+			if (ProjectileEffect != nullptr){
+				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ProjectileEffect, MyLocation);
+			}
+			for (auto& Hit : OutHits) {
+				auto* HitComp = Hit.GetComponent();
+				if (Hit.GetActor()->CanBeDamaged()) {
+					FRadialDamageEvent ev;
+					float DamageFalloff = 1.0f;
+					DamageFalloff = FMath::Clamp(DamageFalloff, (Hit.GetActor()->GetActorLocation() - MyLocation).Size() / Radius, 1.0f);
+					Hit.GetActor()->TakeDamage(Damage * DamageFalloff, ev, GetInstigatorController(), this);
+				}
+				if (HitComp && HitComp->IsSimulatingPhysics() == true) {
+					HitComp->AddRadialImpulse(Hit.ImpactPoint, Radius, PrMovementComponent->Velocity.Size() * 10.0f, ERadialImpulseFalloff::RIF_Constant);
+				}
 			}
 		}
 	}

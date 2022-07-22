@@ -19,6 +19,7 @@ AWeaponBase::AWeaponBase()
 	RootComponent = WeaponMeshComponent;
 	SpawnPoint = CreateDefaultSubobject<USphereComponent>(TEXT("Spawn point"));
 	SpawnPoint->SetupAttachment(RootComponent);
+	SpawnPoint->AttachToComponent(RootComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("SpawnSocket"));
 }
 
 // Called when the game starts or when spawned

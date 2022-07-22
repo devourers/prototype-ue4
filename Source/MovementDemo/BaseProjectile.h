@@ -78,6 +78,8 @@ public:
 	FOnProjectileHit OnProjectileHit;
 	UPROPERTY()
 		FVector LastLocation;
+	UPROPERTY()
+		FVector HitLocation;
 	UFUNCTION()
 		void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
 };

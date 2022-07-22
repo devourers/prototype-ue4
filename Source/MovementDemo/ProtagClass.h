@@ -88,7 +88,7 @@ public:
 		void RopeShorter();
 
 	UFUNCTION()
-		void BindRopeToNewLocation(AActor* LastActor, FVector pos);
+		void BindRopeToNewLocation(AActor* LastActor, FVector& pos);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		int current_weapon;
@@ -153,7 +153,7 @@ public:
 	//Timer Handlers
 	FTimerHandle BhopHandler;
 	FTimerHandle SwitchHandler;
-
+	AActor* LastRopeHitActor;
 	//gameplay in-code logic
 	FVector InteractStart;
 	FVector InteractFinish;

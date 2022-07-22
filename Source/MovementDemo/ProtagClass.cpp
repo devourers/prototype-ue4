@@ -124,7 +124,7 @@ void AProtagClass::Tick(float DeltaTime)
 		}
 	}
 	if (isRopeGunned && RopeGunProjectile) {
-		//CurrentCable->CableLength = FMath::Clamp(RopeGunProjectile->TraveledDistance, 0.0f, RopeGunProjectile->TraveledDistance);
+		//CurrentCable->CableLength = RopeGunProjectile->TraveledDistance; //TODO
 	}
 }
 
@@ -324,7 +324,7 @@ void AProtagClass::ShootRope() {
 		RopeGunProjectile->SetHidden(true);
 		CurrentCable->SetAttachEndToComponent(RopeGunProjectile->GetRootComponent());
 		RopeGunProjectile->FireInDirection(MuzzleRotation.Vector());
-		RopeGunProjectile->OnProjectileHit.BindUFunction(this, TEXT("BindRopeToNewLocation"), RopeGunProjectile->LastHitActor, RopeGunProjectile->LastLocation);
+		RopeGunProjectile->OnProjectileHit.BindUFunction(this, TEXT("BindRopeToNewLocation"), RopeGunProjectile->LastHitActor, RopeGunProjectile->HitLocation);
 		CurrentCable->bAttachEnd = true;
 	}
 	else {
@@ -332,31 +332,46 @@ void AProtagClass::ShootRope() {
 		CurrentCable->bAttachEnd = false;
 		CurrentCable->SetHiddenInGame(true);
 		isRopeGunned = false;
-		CurrentCable->CableLength = 0.0f;
+		if (LastRopeHitActor){
+			auto comp_set = LastRopeHitActor->GetComponents();
+			for (auto comp : comp_set) {
+				if (comp->GetName() == TEXT("Ropehit")) {
+					GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("destroying Ropehit"));
+					comp->UnregisterComponent();
+					comp->DestroyComponent();
+				}
+			}
+			CurrentCable->CableLength = 0.0f;
+		}
 	}
 }
 
-void AProtagClass::BindRopeToNewLocation(AActor* LastActor, FVector pos) {
+void AProtagClass::BindRopeToNewLocation(AActor* LastActor, FVector& pos) {
 	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Executed func"));
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, pos.ToString());
+	LastRopeHitActor = RopeGunProjectile->LastHitActor;
 	if (RopeGunProjectile->LastHitActor){
+		UPrimitiveComponent* NewRopeHitLocation = NewObject<UPrimitiveComponent>(RopeGunProjectile->LastHitActor, UPrimitiveComponent::StaticClass(), TEXT("Ropehit"));
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, pos.ToString());
+		if (NewRopeHitLocation){
+			NewRopeHitLocation->RegisterComponent();
+			NewRopeHitLocation->AttachToComponent(RopeGunProjectile->LastHitActor->GetRootComponent(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+			NewRopeHitLocation->SetWorldLocation(RopeGunProjectile->HitLocation);
+			NewRopeHitLocation->CreationMethod = EComponentCreationMethod::Instance;
+		}
 		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, RopeGunProjectile->LastHitActor->GetName());
-		//CurrentCable->SetAttachEndTo(RopeGunProjectile->LastHitActor, NAME_None);
-		CurrentCable->SetAttachEndToComponent(RopeGunProjectile->LastHitActor->GetRootComponent());
+		CurrentCable->SetAttachEndToComponent(NewRopeHitLocation);
 		CurrentCable->CableLength = RopeGunProjectile->TraveledDistance;
 	}
 }
 
 void AProtagClass::RopeLonger(){
 	if (isRopeGunned) {
-		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Longer"));
 		CurrentCable->CableLength += 100.0f;
 	}
 }
 
 void AProtagClass::RopeShorter() {
 	if (isRopeGunned) {
-		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Shorter"));
 		CurrentCable->CableLength -= 100.0f;
 	}
 }

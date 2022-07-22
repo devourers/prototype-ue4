@@ -37,7 +37,6 @@ void ABasicEnemy::Tick(float DeltaTime)
 		GetMesh()->WakeAllRigidBodies();
 		GetWorldTimerManager().SetTimer(DeathHandler, this, &ABasicEnemy::Die, 0.2f, false, 1.0f);
 		UnPossessed();
-		//this->GetController()->Destroy();
 	}
 }
 
