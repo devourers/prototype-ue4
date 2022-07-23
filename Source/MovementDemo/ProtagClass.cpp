@@ -45,7 +45,7 @@ AProtagClass::AProtagClass()
 	CurrentCable->bAttachEnd = true;
 	//CurrentCable->CableLength = 100.0f;
 	isRopeGunned = false;
-	
+	PauseMeunWidget = CreateDefaultSubobject<UPauseWidget>(TEXT("PauseMenuplsWork"));
 	CurrentItem = NULL;
 
 }
@@ -157,6 +157,8 @@ void AProtagClass::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAction("RopeGun", IE_Pressed, this, &AProtagClass::ShootRope);
 	PlayerInputComponent->BindAction("RopeShorter", IE_Pressed, this, &AProtagClass::RopeShorter);
 	PlayerInputComponent->BindAction("RopeLonger", IE_Pressed, this, &AProtagClass::RopeLonger);
+	FInputActionBinding& pause = PlayerInputComponent->BindAction("Pause", IE_Pressed, this, &AProtagClass::TogglePause);
+	pause.bExecuteWhenPaused = true;
 }
 
 
@@ -347,18 +349,15 @@ void AProtagClass::ShootRope() {
 }
 
 void AProtagClass::BindRopeToNewLocation(AActor* LastActor, FVector& pos) {
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Executed func"));
 	LastRopeHitActor = RopeGunProjectile->LastHitActor;
 	if (RopeGunProjectile->LastHitActor){
 		USceneComponent* NewRopeHitLocation = NewObject<USceneComponent>(RopeGunProjectile->LastHitActor, USceneComponent::StaticClass(), TEXT("Ropehit"));
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, pos.ToString());
 		if (NewRopeHitLocation){
 			NewRopeHitLocation->RegisterComponent();
 			NewRopeHitLocation->AttachToComponent(RopeGunProjectile->LastHitActor->GetRootComponent(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 			NewRopeHitLocation->SetWorldLocation(RopeGunProjectile->HitLocation);
 			NewRopeHitLocation->CreationMethod = EComponentCreationMethod::Instance;
 		}
-		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, RopeGunProjectile->LastHitActor->GetName());
 		CurrentCable->SetAttachEndToComponent(NewRopeHitLocation);
 		CurrentCable->CableLength = RopeGunProjectile->TraveledDistance;
 	}
@@ -376,3 +375,8 @@ void AProtagClass::RopeShorter() {
 	}
 }
 
+void AProtagClass::TogglePause() {
+	if (PauseMeunWidget){
+		PauseMeunWidget->ChangeTogglePause();
+	}
+}

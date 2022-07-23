@@ -10,6 +10,7 @@
 #include "WeaponBase.h"
 #include "CableComponent.h"
 #include "InteractableObject.h"
+#include "PauseWidget.h"
 #include "ProtagClass.generated.h"
 
 UCLASS()
@@ -90,6 +91,9 @@ public:
 	UFUNCTION()
 		void BindRopeToNewLocation(AActor* LastActor, FVector& pos);
 
+	UFUNCTION()
+		void TogglePause();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		int current_weapon;
 
@@ -149,6 +153,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 		class AInteractableObject* CurrentItem;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UI)
+		class UPauseWidget* PauseMeunWidget;
 
 	//Timer Handlers
 	FTimerHandle BhopHandler;
