@@ -155,7 +155,7 @@ public:
 		class AInteractableObject* CurrentItem;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UI)
-		class UPauseWidget* PauseMeunWidget;
+		class UPauseWidget* PauseMenuWidget;
 
 	//Timer Handlers
 	FTimerHandle BhopHandler;

@@ -45,7 +45,7 @@ AProtagClass::AProtagClass()
 	CurrentCable->bAttachEnd = true;
 	//CurrentCable->CableLength = 100.0f;
 	isRopeGunned = false;
-	PauseMeunWidget = CreateDefaultSubobject<UPauseWidget>(TEXT("PauseMenuplsWork"));
+	PauseMenuWidget = CreateDefaultSubobject<UPauseWidget>(TEXT("PauseMenuplsWork"));
 	CurrentItem = NULL;
 
 }
@@ -376,7 +376,17 @@ void AProtagClass::RopeShorter() {
 }
 
 void AProtagClass::TogglePause() {
-	if (PauseMeunWidget){
-		PauseMeunWidget->ChangeTogglePause();
+	if (PauseMenuWidget){
+		if (!UGameplayStatics::IsGamePaused(GetWorld())){
+		ProtagCameraComponent->PostProcessSettings.DepthOfFieldScale = 100.0f;
+		ProtagCameraComponent->PostProcessSettings.DepthOfFieldDepthBlurAmount = 1000.0f;
+		ProtagCameraComponent->PostProcessSettings.DepthOfFieldFarBlurSize = 1000.0f;
+		}
+		else {
+			ProtagCameraComponent->PostProcessSettings.DepthOfFieldScale = 0.0f;
+			ProtagCameraComponent->PostProcessSettings.DepthOfFieldDepthBlurAmount = 0.0f;
+			ProtagCameraComponent->PostProcessSettings.DepthOfFieldFarBlurSize = 0.0f;
+		}
+		PauseMenuWidget->ChangeTogglePause();
 	}
 }
