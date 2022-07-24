@@ -14,9 +14,7 @@ void AMovementDemoGameModeBase::StartPlay() {
 
 void AMovementDemoGameModeBase::Tick(float DeltaTime) {
   Super::Tick(DeltaTime);
-  if (Player) {
-    if (Player->Health == 0) {
-      this->StartPlay();
-    }
+  if (Player && Player->Health == 0) {
+	  Restart();
   }
 }

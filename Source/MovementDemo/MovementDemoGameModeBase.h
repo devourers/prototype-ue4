@@ -18,6 +18,8 @@ class MOVEMENTDEMO_API AMovementDemoGameModeBase : public AGameModeBase
 
 	virtual void Tick(float DeltaTime) override;
 
+	void Restart() { GetWorld()->ServerTravel("?Restart"); }
+
 public:
 	AProtagClass* Player;
 };

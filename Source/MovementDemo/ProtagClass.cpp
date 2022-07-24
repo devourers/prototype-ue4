@@ -169,6 +169,31 @@ void AProtagClass::AddControllerPitchYawInput(float pitch, float yaw) {
 	Super::AddControllerPitchInput(fixed.X);
 }
 
+float AProtagClass::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	UE_LOG(LogTemp, Warning, TEXT("DAMAGEDAWDAWD!"));
+	
+	// TODO: respect health amount
+
+	//GetMesh()->SetAllBodiesSimulatePhysics(true);
+	//GetMesh()->SetSimulatePhysics(true);
+	//GetMesh()->WakeAllRigidBodies();
+
+	//GetMesh()->SetOwnerNoSee(false);
+
+	//Destroy();
+	
+	ProtagMesh->SetOwnerNoSee(true);
+	WeaponInventory[current_weapon]->WeaponMeshComponent->SetOwnerNoSee(true);
+	Health = 0;
+	//UnPossessed();
+
+	//GetWorld()->ServerTravel("?Restart");
+	//GetWorldTimerManager().SetTimer(FTimerHandle(), , 1.0f, true, 2.0f);
+
+	return 0.0f;
+}
+
 void AProtagClass::AddControllerYawInput(float Val) {
 	AddControllerPitchYawInput(0, Val);
 }
