@@ -8,13 +8,13 @@ void AMovementDemoGameModeBase::StartPlay() {
   Super::StartPlay();
   check(GEngine != nullptr);
   TArray<AActor*> protag_arr;
-  UGameplayStatics::GetAllActorsOfClass(GetWorld(), AProtagClass::StaticClass(), protag_arr);
-  Player = Cast<AProtagClass>(protag_arr[0]);
+  Player = Cast<AProtagClass>(UGameplayStatics::GetActorOfClass(GetWorld(), AProtagClass::StaticClass()));
 }
 
 void AMovementDemoGameModeBase::Tick(float DeltaTime) {
   Super::Tick(DeltaTime);
   if (Player && Player->Health == 0) {
-	  Restart();
+	  FTimerHandle dummy;
+	  GetWorldTimerManager().SetTimer(dummy, this, &AMovementDemoGameModeBase::Restart, 1.0f);
   }
 }
