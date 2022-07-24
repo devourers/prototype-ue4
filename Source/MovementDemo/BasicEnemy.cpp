@@ -51,8 +51,8 @@ void ABasicEnemy::OnPlayerCaught(APawn* pawn) {
 	AEnemyAIPatrolController* AIController = Cast<AEnemyAIPatrolController>(GetController());
 	if (AIController) {
 		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Purple, TEXT("Popavs"));
+		AIController->SetPlayerCaught(pawn);
 	}
-	AIController->SetPlayerCaught(pawn);
 }
 
 float ABasicEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) {
