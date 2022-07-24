@@ -37,6 +37,8 @@ void ABasicEnemy::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	CurrentHealth = FMath::Clamp(CurrentHealth, 0.0f, MaxHealth);
 	if (CurrentHealth <= 0.0) {
+		UCapsuleComponent* caps = Cast<UCapsuleComponent>(RootComponent);
+		caps->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		GetMesh()->SetAllBodiesSimulatePhysics(true);
 		GetMesh()->SetSimulatePhysics(true);
 		GetMesh()->WakeAllRigidBodies();
@@ -84,6 +86,8 @@ float ABasicEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEven
 	if (CurrentHealth > 0.0) {
 		CurrentHealth -= DamageAmount;
 		if (CurrentHealth <= 0.0) {
+			UCapsuleComponent* caps = Cast<UCapsuleComponent>(RootComponent);
+			caps->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			GetMesh()->SetAllBodiesSimulatePhysics(true);
 			GetMesh()->SetSimulatePhysics(true);
 			GetMesh()->WakeAllRigidBodies();
