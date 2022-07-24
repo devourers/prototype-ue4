@@ -16,7 +16,6 @@ ABasicEnemy::ABasicEnemy()
 	PrimaryActorTick.bCanEverTick = true;
 	PawnSensingComp = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensingComp"));
 	PawnSensingComp->SetPeripheralVisionAngle(90.0f);
-	GetMesh()->SetupAttachment(RootComponent);
 	Weapon = CreateDefaultSubobject<UChildActorComponent>(TEXT("Weapon"));
 	Weapon->SetupAttachment(GetMesh(), FName("hand_l")); // can crash if no mesh todo
 }
@@ -58,8 +57,8 @@ void ABasicEnemy::Tick(float DeltaTime)
 		FCollisionQueryParams c_q_params;
 		bool isHit = GetWorld()->LineTraceSingleByChannel(ResHit, Start, End, ECC_MAX, c_q_params);
 		FRotator a;
-		a.Roll = FMath::RandRange(-0.5f, 0.5f); //TODO gun deviation in params
-		a.Yaw = FMath::RandRange(-0.5f, 0.5f); //TODO gun deviation in params
+		a.Roll = FMath::RandRange(-10.0f, 10.0f); //TODO gun deviation in params
+		a.Yaw = FMath::RandRange(-10.0f, 10.0f); //TODO gun deviation in params
 		if (ResHit.GetActor() == target && weapon->CurrentAmmo)
 			weapon->AttackWithWeapon(FVector(0), GetControlRotation() + a, ai);
 		else
