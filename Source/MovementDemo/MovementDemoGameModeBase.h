@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "ProtagClass.h"
 #include "MovementDemoGameModeBase.generated.h"
 
 /**
@@ -14,4 +15,9 @@ class MOVEMENTDEMO_API AMovementDemoGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 		virtual void StartPlay() override;
+
+	virtual void Tick(float DeltaTime) override;
+
+public:
+	AProtagClass* Player;
 };
