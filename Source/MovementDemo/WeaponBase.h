@@ -63,6 +63,11 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = " Damage ")
 		float Damage;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = " Fire Rate ")
+		int FireRate; //per second
+
+
+
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Audio)
 		USoundBase* SB_shot;
 
@@ -83,4 +88,5 @@ public:
 	virtual void Reload();
 	virtual void StopReload();
 	FTimerHandle ReloadHandler;
+	int total_shots_this_tick;
 };

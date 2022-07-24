@@ -35,13 +35,14 @@ void AWeaponBase::BeginPlay()
 void AWeaponBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	total_shots_this_tick = 0;
 	std::string cal = "Current ammo: " + std::to_string(CurrentAmmo);
 	FString current_ammo_log = WeaponName + ", " + FString(cal.c_str());
 	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, current_ammo_log);
 }
 
 void AWeaponBase::AttackWithWeapon(const FVector& MuzzleLocation, const FRotator& MuzzleRotation, AController* Controller) {
-	if (!isReloading && CurrentAmmo != 0) {
+	if (!isReloading && CurrentAmmo != 0 && total_shots_this_tick < FireRate) {
 		if (SB_shot != nullptr) {
 			//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Playing sound"));
 			UGameplayStatics::PlaySoundAtLocation(this, SB_shot, GetActorLocation());
@@ -63,7 +64,8 @@ void AWeaponBase::AttackWithWeapon(const FVector& MuzzleLocation, const FRotator
 				if (Projectile) {
 					FVector LaunchDirection = MuzzleRotation.Vector();
 					Projectile->FireInDirection(LaunchDirection);
-					this->CurrentAmmo -= 1;
+					CurrentAmmo -= 1;
+					total_shots_this_tick += 1;
 				}
 			}
 		}
@@ -86,7 +88,8 @@ void AWeaponBase::AttackWithWeapon(const FVector& MuzzleLocation, const FRotator
 					ResHit.GetComponent()->AddImpulseAtLocation(MuzzleRotation.Vector() * 10.0f * Range, ResHit.ImpactPoint);
 				}
 			}
-			this->CurrentAmmo -= 1;
+			CurrentAmmo -= 1;
+			total_shots_this_tick += 1;
 		}
 	}
 	else {
