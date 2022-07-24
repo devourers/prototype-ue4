@@ -41,7 +41,7 @@ void AWeaponBase::Tick(float DeltaTime)
 }
 
 void AWeaponBase::AttackWithWeapon(const FVector& MuzzleLocation, const FRotator& MuzzleRotation, AController* Controller) {
-	if (!isReloading) {
+	if (!isReloading && CurrentAmmo != 0) {
 		if (SB_shot != nullptr) {
 			//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Playing sound"));
 			UGameplayStatics::PlaySoundAtLocation(this, SB_shot, GetActorLocation());
@@ -88,6 +88,9 @@ void AWeaponBase::AttackWithWeapon(const FVector& MuzzleLocation, const FRotator
 			}
 			this->CurrentAmmo -= 1;
 		}
+	}
+	else {
+		//todo
 	}
 }
 

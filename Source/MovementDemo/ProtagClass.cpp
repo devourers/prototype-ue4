@@ -207,7 +207,7 @@ void AProtagClass::StopJump() {
 
 void AProtagClass::Fire() {
 	if (!isHolding && !is_sprinting){
-		if (WeaponInventory[current_weapon] && WeaponInventory[current_weapon]->CurrentAmmo != 0) {
+		if (WeaponInventory[current_weapon]) {
 			FVector CameraLocation;
 			FRotator CameraRotation;
 			GetActorEyesViewPoint(CameraLocation, CameraRotation);
