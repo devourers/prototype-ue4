@@ -39,9 +39,9 @@ AProtagClass::AProtagClass()
 	RopeGunComponent->SetupAttachment(ProtagMesh);
 
 	CurrentCable = CreateDefaultSubobject<UCableComponent>(TEXT("RopeGun"));
-	CurrentCable->SetHiddenInGame(true);
 	CurrentCable->SetupAttachment(RopeGunComponent);
 	CurrentCable->SetHiddenInGame(true);
+	CurrentCable->SetOwnerNoSee(true);
 	CurrentCable->bAttachEnd = true;
 	//CurrentCable->CableLength = 100.0f;
 	isRopeGunned = false;
@@ -182,7 +182,9 @@ float AProtagClass::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 	//GetMesh()->SetOwnerNoSee(false);
 
 	//Destroy();
-	
+	ProtagMesh->SetAllBodiesSimulatePhysics(true);
+	ProtagMesh->SetSimulatePhysics(true);
+	ProtagMesh->WakeAllRigidBodies();
 	ProtagMesh->SetOwnerNoSee(true);
 	WeaponInventory[current_weapon]->WeaponMeshComponent->SetOwnerNoSee(true);
 	Health = 0;
@@ -337,6 +339,7 @@ void AProtagClass::ShootRope() {
 	if (!isRopeGunned) {
 		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Shoot roped"));
 		CurrentCable->SetHiddenInGame(false);
+		CurrentCable->SetOwnerNoSee(false);
 		isRopeGunned = true;
 		CurrentCable->bAttachEnd = false;
 		FActorSpawnParameters SpawnParams;
@@ -357,6 +360,7 @@ void AProtagClass::ShootRope() {
 	else {
 		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Retract roped"));
 		CurrentCable->bAttachEnd = false;
+		CurrentCable->SetOwnerNoSee(true);
 		CurrentCable->SetHiddenInGame(true);
 		isRopeGunned = false;
 		if (LastRopeHitActor){

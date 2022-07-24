@@ -74,7 +74,7 @@ void AWeaponBase::AttackWithWeapon(const FVector& MuzzleLocation, const FRotator
 			FVector Start = SpawnPoint->GetComponentLocation();
 			FVector End = Start + MuzzleRotation.Vector() * Range;
 			FCollisionQueryParams c_q_params;
-			bool isHit = GetWorld()->LineTraceSingleByChannel(ResHit, Start, End, ECC_Visibility, c_q_params);
+			bool isHit = GetWorld()->LineTraceSingleByChannel(ResHit, Start, End, ECC_MAX, c_q_params);
 			if (isHit) {
 				if (ResHit.GetActor()->CanBeDamaged()) {
 					FPointDamageEvent ev;
