@@ -83,9 +83,15 @@ void AWeaponBase::AttackWithWeapon(const FVector& MuzzleLocation, const FRotator
 				if (HitScanEffect != nullptr) {
 					UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), HitScanEffect, ResHit.ImpactPoint);
 				}
-				if (ResHit.GetComponent()->IsSimulatingPhysics()){
-					ResHit.GetComponent()->AddImpulseAtLocation(MuzzleRotation.Vector() * 10.0f * Range, ResHit.ImpactPoint);
+				for (auto cmp : ResHit.GetActor()->GetComponents()) {
+					UPrimitiveComponent* cmp_ = Cast<UPrimitiveComponent>(cmp);
+					if (cmp_ && cmp_->IsSimulatingPhysics()) {
+						cmp_->AddImpulseAtLocation(MuzzleRotation.Vector() * 10.0f * Range, ResHit.ImpactPoint);
+					}
 				}
+				//if (ResHit.GetComponent()->IsSimulatingPhysics()){
+			  //	ResHit.GetComponent()->AddImpulseAtLocation(MuzzleRotation.Vector() * 10.0f * Range, ResHit.ImpactPoint);
+				//}
 			}
 			CurrentAmmo -= 1;
 		}
