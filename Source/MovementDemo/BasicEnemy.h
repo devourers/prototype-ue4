@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "WeaponBase.h"
 #include "BasicEnemy.generated.h"
 
 UCLASS()
@@ -37,6 +38,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Health)
 		float MaxHealth;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		TSubclassOf<class AWeaponBase> WeaponCls;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadonly)
+		UChildActorComponent* Weapon;
 
 private:
 	UFUNCTION()

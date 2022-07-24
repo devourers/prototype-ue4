@@ -5,6 +5,9 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "EnemyAIPatrolController.h"
 #include "Perception/PawnSensingComponent.h"
+#include "ProtagClass.h"
+#include "Kismet/GameplayStatics.h"
+
 
 // Sets default values
 ABasicEnemy::ABasicEnemy()
@@ -13,13 +16,16 @@ ABasicEnemy::ABasicEnemy()
 	PrimaryActorTick.bCanEverTick = true;
 	PawnSensingComp = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensingComp"));
 	PawnSensingComp->SetPeripheralVisionAngle(90.0f);
+
+	Weapon = CreateDefaultSubobject<UChildActorComponent>(TEXT("Weapon"));
+	Weapon->SetupAttachment(GetMesh(), FName("hand_l")); // can crash if no mesh todo
 }
 
 // Called when the game starts or when spawned
 void ABasicEnemy::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	if (PawnSensingComp) {
 		PawnSensingComp->OnSeePawn.AddDynamic(this, &ABasicEnemy::OnPlayerCaught);
 	}
@@ -38,13 +44,25 @@ void ABasicEnemy::Tick(float DeltaTime)
 		GetWorldTimerManager().SetTimer(DeathHandler, this, &ABasicEnemy::Die, 0.2f, false, 1.0f);
 		UnPossessed();
 	}
+	
+	// TODO: move this logic to AIController
+	AEnemyAIPatrolController* ai = Cast<AEnemyAIPatrolController>(GetController());
+	AActor *target = UGameplayStatics::GetActorOfClass(GetWorld(), AProtagClass::StaticClass());
+	AWeaponBase* weapon = Cast<AWeaponBase>(Weapon->GetChildActor());
+
+	if (ai && target && weapon) {
+		ai->SetFocus(target);
+		if (weapon->CurrentAmmo)
+			weapon->AttackWithWeapon(FVector(0), GetControlRotation(), ai);
+		else
+			weapon->Reload();
+	}
 }
 
 // Called to bind functionality to input
 void ABasicEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
 }
 
 void ABasicEnemy::OnPlayerCaught(APawn* pawn) {

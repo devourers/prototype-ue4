@@ -88,5 +88,5 @@ public:
 	virtual void Reload();
 	virtual void StopReload();
 	FTimerHandle ReloadHandler;
-	int total_shots_this_tick;
+	float LastShootTime = -100;
 };
