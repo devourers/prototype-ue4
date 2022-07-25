@@ -84,7 +84,7 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	virtual void AttackWithWeapon(const FVector& MuzzleLocation, const FRotator& MuzzleRotation, AController* Controller);
+	virtual bool AttackWithWeapon(const FVector& MuzzleLocation, const FRotator& MuzzleRotation, AController* Controller);
 	virtual void Reload();
 	virtual void StopReload();
 	FTimerHandle ReloadHandler;

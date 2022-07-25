@@ -38,33 +38,14 @@ void ABasicEnemy::Tick(float DeltaTime)
 	CurrentHealth = FMath::Clamp(CurrentHealth, 0.0f, MaxHealth);
 	if (CurrentHealth <= 0.0) {
 		UCapsuleComponent* caps = Cast<UCapsuleComponent>(RootComponent);
+		UnPossessed();
+		Weapon->DetachFromParent();
 		caps->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		GetMesh()->SetAllBodiesSimulatePhysics(true);
 		GetMesh()->SetSimulatePhysics(true);
 		GetMesh()->WakeAllRigidBodies();
-		GetWorldTimerManager().SetTimer(DeathHandler, this, &ABasicEnemy::Die, 0.2f, false, 1.0f);
-		UnPossessed();
-	}
-	
-	// TODO: move this logic to AIController
-	AEnemyAIPatrolController* ai = Cast<AEnemyAIPatrolController>(GetController());
-	AActor *target = UGameplayStatics::GetActorOfClass(GetWorld(), AProtagClass::StaticClass());
-	AWeaponBase* weapon = Cast<AWeaponBase>(Weapon->GetChildActor());
 
-	if (ai && target && weapon) {
-		ai->SetFocus(target);
-		FHitResult ResHit;
-		FVector Start = weapon->SpawnPoint->GetComponentLocation();
-		FVector End = Start + GetControlRotation().Vector() * weapon->Range;
-		FCollisionQueryParams c_q_params;
-		bool isHit = GetWorld()->LineTraceSingleByChannel(ResHit, Start, End, ECC_MAX, c_q_params);
-		FRotator a;
-		a.Roll = FMath::RandRange(-10.0f, 10.0f); //TODO gun deviation in params
-		a.Yaw = FMath::RandRange(-10.0f, 10.0f); //TODO gun deviation in params
-		if (ResHit.GetActor() == target && weapon->CurrentAmmo)
-			weapon->AttackWithWeapon(FVector(0), GetControlRotation() + a, ai);
-		else
-			weapon->Reload();
+		//GetWorldTimerManager().SetTimer(DeathHandler, this, &ABasicEnemy::Die, 0.2f, false, 1.0f);
 	}
 }
 
@@ -88,10 +69,12 @@ float ABasicEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEven
 		if (CurrentHealth <= 0.0) {
 			UCapsuleComponent* caps = Cast<UCapsuleComponent>(RootComponent);
 			caps->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			UnPossessed();
+			Weapon->DetachFromParent();
 			GetMesh()->SetAllBodiesSimulatePhysics(true);
 			GetMesh()->SetSimulatePhysics(true);
 			GetMesh()->WakeAllRigidBodies();
-			GetWorldTimerManager().SetTimer(DeathHandler, this, &ABasicEnemy::Die, 0.2f, false, 1.0f);
+			//GetWorldTimerManager().SetTimer(DeathHandler, this, &ABasicEnemy::Die, 0.2f, false, 1.0f);
 		}
 	}
 	return DamageAmount;

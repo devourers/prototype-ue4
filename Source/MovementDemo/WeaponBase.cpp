@@ -40,7 +40,8 @@ void AWeaponBase::Tick(float DeltaTime)
 	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, current_ammo_log);
 }
 
-void AWeaponBase::AttackWithWeapon(const FVector& MuzzleLocation, const FRotator& MuzzleRotation, AController* Controller) {
+bool AWeaponBase::AttackWithWeapon(const FVector& MuzzleLocation, const FRotator& MuzzleRotation, AController* Controller) {
+	bool is_hit = false;
 	if (!isReloading && CurrentAmmo != 0 && GetWorld()->GetTimeSeconds() > LastShootTime + 1. / FireRate) {
 		LastShootTime = GetWorld()->GetTimeSeconds();
 		if (SB_shot != nullptr) {
@@ -92,13 +93,16 @@ void AWeaponBase::AttackWithWeapon(const FVector& MuzzleLocation, const FRotator
 				//if (ResHit.GetComponent()->IsSimulatingPhysics()){
 			  //	ResHit.GetComponent()->AddImpulseAtLocation(MuzzleRotation.Vector() * 10.0f * Range, ResHit.ImpactPoint);
 				//}
+
 			}
 			CurrentAmmo -= 1;
+			is_hit = true;
 		}
 	}
 	else {
 		//todo
 	}
+	return is_hit;
 }
 
 void AWeaponBase::StopReload() {

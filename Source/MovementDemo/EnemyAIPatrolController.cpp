@@ -2,7 +2,6 @@
 
 
 #include "EnemyAIPatrolController.h"
-#include "BasicEnemy.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "BehaviorTree/BehaviorTree.h"
@@ -28,7 +27,7 @@ void AEnemyAIPatrolController::SetPlayerCaught(APawn* pawn) {
 void AEnemyAIPatrolController::OnPossess(APawn* pawn) {
   Super::OnPossess(pawn);
 
-  ABasicEnemy* Enemy = Cast<ABasicEnemy>(pawn);
+  Enemy = Cast<ABasicEnemy>(pawn);
 
   if (Enemy) {
     if (Enemy->BTree->BlackboardAsset) {
@@ -39,4 +38,22 @@ void AEnemyAIPatrolController::OnPossess(APawn* pawn) {
 
     BehTree->StartTree(*Enemy->BTree);
   }
+}
+
+bool AEnemyAIPatrolController::Shoot() {
+  bool is_enemy_hit = false;
+  if (Enemy && Enemy->Weapon && Enemy->CurrentHealth > 0) {
+    AWeaponBase* weapon = Cast<AWeaponBase>(Enemy->Weapon->GetChildActor());
+    if (weapon && weapon->CurrentAmmo > 0){
+      GetControlRotation();
+      FRotator a;
+      a.Roll = FMath::RandRange(-10.0f, 10.0f); //TODO gun deviation in params
+      a.Yaw = FMath::RandRange(-10.0f, 10.0f); //TODO gun deviation in params
+      is_enemy_hit = weapon->AttackWithWeapon(FVector(0), GetControlRotation() + a, this);
+    }
+    else if (weapon->CurrentAmmo == 0) {
+      weapon->Reload();
+    }
+  }
+  return is_enemy_hit;
 }

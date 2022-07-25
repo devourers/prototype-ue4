@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
+#include "BasicEnemy.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "EnemyAIPatrolController.generated.h"
 
@@ -25,6 +26,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
 		FName PlayerKey;
 
+	UPROPERTY()
+		ABasicEnemy* Enemy;
+
 	TArray<AActor*> PatrolPoints;
 	virtual void OnPossess(APawn* pawn) override;
 
@@ -33,6 +37,8 @@ public:
 	AEnemyAIPatrolController();
 
 	void SetPlayerCaught(APawn* pawn);
+
+	bool Shoot();
 
 	FORCEINLINE UBlackboardComponent* GetBlackboardComponent() const { return BBcomp; }
 	FORCEINLINE TArray<AActor*> GetPatrolPoints() const { return PatrolPoints; }
