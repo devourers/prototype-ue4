@@ -7,7 +7,6 @@
 void AMovementDemoGameModeBase::StartPlay() {
   Super::StartPlay();
   check(GEngine != nullptr);
-  TArray<AActor*> protag_arr;
   Player = Cast<AProtagClass>(UGameplayStatics::GetActorOfClass(GetWorld(), AProtagClass::StaticClass()));
 }
 
