@@ -37,7 +37,6 @@ void AWeaponBase::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	std::string cal = "Current ammo: " + std::to_string(CurrentAmmo);
 	FString current_ammo_log = WeaponName + ", " + FString(cal.c_str());
-	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, current_ammo_log);
 }
 
 bool AWeaponBase::AttackWithWeapon(const FVector& MuzzleLocation, const FRotator& MuzzleRotation, AController* Controller) {

@@ -4,7 +4,6 @@
 #include "BasicEnemy.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "EnemyAIPatrolController.h"
-#include "Perception/PawnSensingComponent.h"
 #include "ProtagClass.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -36,16 +35,26 @@ void ABasicEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	CurrentHealth = FMath::Clamp(CurrentHealth, 0.0f, MaxHealth);
+	AWeaponBase* wep_ = Cast<AWeaponBase>(Weapon);
 	if (CurrentHealth <= 0.0) {
 		UCapsuleComponent* caps = Cast<UCapsuleComponent>(RootComponent);
-		UnPossessed();
-		Weapon->DetachFromParent();
+		AEnemyAIPatrolController* AIController = Cast<AEnemyAIPatrolController>(GetController());
+		if (AIController) {
+			AIController->UnPossess();
+		}
+		AWeaponBase* wep = Cast<AWeaponBase>(Weapon->GetChildActor());
+		if (wep) {
+			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Purple, TEXT("got weapon when died"));
+			wep->WeaponMeshComponent->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+			wep->WeaponMeshComponent->SetSimulatePhysics(true);
+			Weapon->DetachFromParent();
+		}
 		caps->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		GetMesh()->SetAllBodiesSimulatePhysics(true);
 		GetMesh()->SetSimulatePhysics(true);
 		GetMesh()->WakeAllRigidBodies();
 
-		//GetWorldTimerManager().SetTimer(DeathHandler, this, &ABasicEnemy::Die, 0.2f, false, 1.0f);
+		SetActorTickEnabled(false);
 	}
 }
 
@@ -69,12 +78,22 @@ float ABasicEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEven
 		if (CurrentHealth <= 0.0) {
 			UCapsuleComponent* caps = Cast<UCapsuleComponent>(RootComponent);
 			caps->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-			UnPossessed();
-			Weapon->DetachFromParent();
+			AEnemyAIPatrolController* AIController = Cast<AEnemyAIPatrolController>(GetController());
+			if (AIController) {
+				AIController->UnPossess();
+			}
+			AWeaponBase* wep = Cast<AWeaponBase>(Weapon->GetChildActor());
+			if (wep) {
+				GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Purple, TEXT("got weapon when died"));
+				wep->WeaponMeshComponent->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+				wep->WeaponMeshComponent->SetSimulatePhysics(true);
+				Weapon->DetachFromParent();
+			}
 			GetMesh()->SetAllBodiesSimulatePhysics(true);
 			GetMesh()->SetSimulatePhysics(true);
 			GetMesh()->WakeAllRigidBodies();
-			//GetWorldTimerManager().SetTimer(DeathHandler, this, &ABasicEnemy::Die, 0.2f, false, 1.0f);
+
+			SetActorTickEnabled(false);
 		}
 	}
 	return DamageAmount;

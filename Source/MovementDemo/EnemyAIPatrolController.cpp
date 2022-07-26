@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "EnemyAIPatrolController.h"
@@ -7,6 +7,7 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "Kismet/GameplayStatics.h"
 #include "EnemyPatrolPoint.h"
+#include "ProtagClass.h"
 
 
 
@@ -18,9 +19,29 @@ AEnemyAIPatrolController::AEnemyAIPatrolController() {
   CurrentPatrolPoint = 0;
 }
 
+void AEnemyAIPatrolController::Tick(float DeltaTime)
+{
+  Super::Tick(DeltaTime);
+  if (BBcomp) {
+    if (BBcomp->GetValueAsObject(PlayerKey)) {
+      if (!LineOfSightTo(Cast<AActor>(BBcomp->GetValueAsObject(PlayerKey)))) {
+        BBcomp->SetValueAsBool("HasLineOfSight", false);
+        BBcomp->ClearValue(PlayerKey);
+      }
+    }
+  }
+}
+
 void AEnemyAIPatrolController::SetPlayerCaught(APawn* pawn) {
   if (BBcomp) {
     BBcomp->SetValueAsObject(PlayerKey, pawn);
+    SetFocus(pawn);
+    if (LineOfSightTo(pawn)) {
+      BBcomp->SetValueAsBool("HasLineOfSight", true);
+    }
+    else {
+      BBcomp->SetValueAsBool("HasLineOfSight", false);
+    }
   }
 }
 

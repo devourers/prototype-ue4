@@ -16,6 +16,10 @@ class MOVEMENTDEMO_API AEnemyAIPatrolController : public AAIController
 {
 	GENERATED_BODY()
 public:
+
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
 	UBehaviorTreeComponent* BehTree;
 		
 	UBlackboardComponent* BBcomp;

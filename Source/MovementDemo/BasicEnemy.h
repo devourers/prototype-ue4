@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "WeaponBase.h"
+#include "Perception/PawnSensingComponent.h"
 #include "BasicEnemy.generated.h"
 
 UCLASS()

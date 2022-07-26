@@ -17,14 +17,21 @@ EBTNodeResult::Type UEnemyAIShootAtTarget::ExecuteTask(UBehaviorTreeComponent& O
 	AProtagClass* Player = Cast<AProtagClass>(BBComp->GetValueAsObject("Target"));
 
 	AIContoller->SetFocus(Player);
-	bool hit_smth = AIContoller->Shoot();
+	if (BBComp->GetValueAsBool("HasLineOfSight")){
+		bool hit_smth = AIContoller->Shoot();
 
-	if (hit_smth) {
-		BBComp->SetValueAsBool(FName(TEXT("HitTheTarget")), true);
+		if (hit_smth) {
+			BBComp->SetValueAsBool(FName(TEXT("HitTheTarget")), true);
+			return EBTNodeResult::Succeeded;
+		}
+		else {
+			BBComp->SetValueAsBool(FName(TEXT("HitTheTarget")), false);
+			return EBTNodeResult::Failed;
+		}
 	}
 	else {
-		BBComp->SetValueAsBool(FName(TEXT("HitTheTarget")), false);
+		BBComp->ClearValue("Target");
+		AIContoller->ClearFocus(EAIFocusPriority::Gameplay);
+		return EBTNodeResult::Failed;
 	}
-
-	return EBTNodeResult::Succeeded;
 }
