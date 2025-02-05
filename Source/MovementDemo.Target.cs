@@ -8,7 +8,8 @@ public class MovementDemoTarget : TargetRules
 	public MovementDemoTarget( TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Game;
-		DefaultBuildSettings = BuildSettingsVersion.V2;
-		ExtraModuleNames.AddRange( new string[] { "MovementDemo" } );
+		DefaultBuildSettings = BuildSettingsVersion.V5;
+        bOverrideBuildEnvironment = true;
+        ExtraModuleNames.AddRange( new string[] { "MovementDemo" } );
 	}
 }
